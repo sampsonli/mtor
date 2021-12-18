@@ -1,6 +1,6 @@
 {
   "name": "mtor",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "react 模块化 依赖注入",
   "author": "sampsonli",
   "keywords": [
