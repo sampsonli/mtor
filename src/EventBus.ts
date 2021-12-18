@@ -1,5 +1,5 @@
 class EventBus {
-    cbs = {
+    private cbs = {
 
     };
 

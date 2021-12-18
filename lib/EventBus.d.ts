@@ -1,5 +1,5 @@
 declare class EventBus {
-    cbs: {};
+    private cbs;
     on(type: any, listener: any): void;
     off(type: any, listener: any): void;
     clean(type: any): void;
