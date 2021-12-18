@@ -1,4 +1,4 @@
-export { eventBus } from './EventBus';
+export { eventBus as evtBus } from './EventBus';
 /**
  * 创建模块
  * @param {string} ns -- 模块名称， 模块名称唯一， 不能有冲突

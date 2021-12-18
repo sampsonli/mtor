@@ -16,6 +16,9 @@ class EventBus {
             this.cbs[type] = this.cbs[type].filter(cb => listener !== cb);
         }
     }
+    clean(type) {
+        delete this.cbs[type]
+    }
 
     emit(event, param) {
         if (this.cbs[event]) {
