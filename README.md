@@ -1,6 +1,6 @@
 # mtor 是什么？
 
-[![Build Status](https://travis-ci.org/sampsonli/mtor.svg?branch=master)](https://travis-ci.org/sampsonli/mtor)
+[comment]: <> ([![Build Status]&#40;https://travis-ci.org/sampsonli/mtor.svg?branch=master&#41;]&#40;https://travis-ci.org/sampsonli/mtor&#41;)
 [![npm version](https://img.shields.io/npm/v/mtor.svg?style=flat)](https://www.npmjs.com/package/mtor) 
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/sampsonli/mtor/blob/master/LICENSE)
 ----

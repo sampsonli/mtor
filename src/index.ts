@@ -6,7 +6,7 @@
  import {useState, useEffect} from 'react';
  import {assign, isGenerator} from "./util";
  import {eventBus} from './EventBus';
-
+export { eventBus} from './EventBus';
  // 保存所有模块的原型
  const allProto = {};
  // 保存所有模块的static属性, 方便开发模式热更新静态数据保留
