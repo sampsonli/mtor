@@ -1,7 +1,7 @@
 # mtor 是什么？
 
 [![Build Status](https://travis-ci.org/sampsonli/mtor.svg?branch=master)](https://travis-ci.org/sampsonli/mtor)
-[![npm version](https://img.shields.io/npm/v/mtro.svg?style=flat)](https://www.npmjs.com/package/mtor) 
+[![npm version](https://img.shields.io/npm/v/mtor.svg?style=flat)](https://www.npmjs.com/package/mtor) 
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/sampsonli/mtor/blob/master/LICENSE)
 ----
 具有以下四大特色:
@@ -45,7 +45,7 @@ yarn add mtor # npm install --save mtor
 > 实现一个简单小需求， 从后端接口获取一个随机数，展示在页面中，
 > 页面有一个按钮，点击给获取的随机数+1
 
-### 2. 定义模块类
+### 1. 定义模块类
 ~~~js
 import {service, Model} from 'mtor';
 function ajax() { // 模拟ajax请求
@@ -96,7 +96,7 @@ export default DemoModel;
 ```
 
 
-### 3. 在页面中使用 model
+### 2. 在页面中使用 model
 > 页面引入model同时支持类组件和方法组件，使用方法如下：
 - 使用react-hooks 写法
 ```jsx
@@ -184,7 +184,6 @@ export default HomeModel;
 2. 注入的实例，类方法中可以获取实例属性， 也可以调用注入实例的方法， 但是不能直接修改实例的属性， 只能通过setData方法或者类方法去设置；
 3. 被注入的属性前面建议加上jsDoc注释，表明属性类型，方便后续使用实例属性和方法, 同时建议加@private， 不提供给组件直接使用；
 4. ***注意*** 在使用被注入的模块的属性前， 一定要确保被注入的模块的属性有值。
-5. ***注意*** 依赖注入主要是解决模块中共享其他模块中数据问题， 尽量避免在页面中使用当前模块中依赖模块中的数据， 如果非要这么使用， 可能会出现数据不同步问题。
 
 
 最后在页面中展示数据
@@ -202,7 +201,6 @@ export default () => {
     useEffect(() => {
         model.init();
     }, []);
-    // model.user.name 可以读取， 但是不建议这样使用，否则可能导致数据不同步。如果不了解底层原理， 建议不要使用，哈哈
     return (
         <div className={style.container}>
             <div className={style.content}>
@@ -254,7 +252,6 @@ export default () => {
     useEffect(() => {
         model.init();
     }, []);
-    // model.user.name 可以读取， 但是不建议这样使用，否则可能导致数据不同步。
     return (
         <div className={style.container}>
             <div className={style.content}>
