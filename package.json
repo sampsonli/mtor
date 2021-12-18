@@ -1,0 +1,38 @@
+{
+  "name": "mtor",
+  "version": "1.0.0",
+  "description": "react 模块化 依赖注入",
+  "author": "sampsonli",
+  "keywords": [
+    "react 模块",
+    "react hooks",
+    "依赖注入",
+    "按需加载",
+    "模块化",
+    "typescript"
+  ],
+  "homepage": "https://github.com/sampsonli/mtor",
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "test:coverage": "jest --coverage"
+  },
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "npmName": "redux-spring",
+  "files": [
+    "lib",
+    "src"
+  ],
+  "peerDependencies": {
+    "react": ">=0.14.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^26.0.15",
+    "jest": "^26.6.3",
+    "react": ">=0.14.0",
+    "ts-jest": "^26.4.4",
+    "typescript": "^3.9.7"
+  }
+}
