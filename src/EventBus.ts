@@ -3,6 +3,11 @@ class EventBus {
 
     };
 
+    /**
+     * 注册事件
+     * @param type - 事件名称
+     * @param listener - 事件回调函数
+     */
     on(type, listener) {
         if (this.cbs[type]) {
             this.cbs[type].push(listener);
@@ -11,15 +16,30 @@ class EventBus {
         }
     }
 
+    /**
+     * 取消注册的事件
+     * @param type - 事件名称
+     * @param listener - 事件回调
+     */
     off(type, listener) {
         if (this.cbs[type]) {
             this.cbs[type] = this.cbs[type].filter(cb => listener !== cb);
         }
     }
+
+    /**
+     * 清除对某事件的所有监控
+     * @param type - 事件名称
+     */
     clean(type) {
         delete this.cbs[type]
     }
 
+    /**
+     * 触发某事件
+     * @param event - 事件名称
+     * @param param - 传递注册事件回调函数的参数
+     */
     emit(event, param) {
         if (this.cbs[event]) {
             const todelete = [];
@@ -33,6 +53,11 @@ class EventBus {
         }
     }
 
+    /**
+     * 只注册一次事件， 回调完销毁事件注册
+     * @param type - 事件名称
+     * @param listener - 事件回调函数
+     */
     once(type, listener) {
         listener._once = true;
         this.on(type, listener);

@@ -14,7 +14,7 @@ export { eventBus as evtBus} from './EventBus';
 
  let allState = {};
 
- const FLAG_PREFIX = 'spring/';
+ const FLAG_PREFIX = 'mtor/';
 
  // 用于保存所有模块依赖注入注册的事件， 防止热更新的时候内存泄露
  const allEvents = {};
@@ -140,7 +140,7 @@ export { eventBus as evtBus} from './EventBus';
           */
          // @ts-ignore
          prototype.reset = function () {
-             const newObj = Object.create(prototype);
+             const newObj = Object.create(allProto[ns]);
              Object.getOwnPropertyNames(instance).forEach(key => {
                  newObj[key] = instance[key];
              });

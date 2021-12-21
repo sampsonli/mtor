@@ -4,6 +4,7 @@
 [![npm version](https://img.shields.io/npm/v/mtor.svg?style=flat)](https://www.npmjs.com/package/mtor) 
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/sampsonli/mtor/blob/master/LICENSE)
 ----
+mtor 是一个基于react 单向数据流状态管理库， 对比主流redux，mbox数据管理库
 具有以下四大特色:
 1. 模块化
 2. 面向对象
@@ -36,7 +37,8 @@ mtor 基本理念参考了后端java 中spring框架， DI（依赖注入）核�
 # 基本原理介绍
 1. mtor底层保存了项目中所有子模块实例， 每个子模块代表所定义模块的一个实例；
 2. 每个子模块下有独立的原型对象， 意味着可以直接在模块中调用相应的原型方法；
-3. 原型方法对应着定义模块类中的类方法， 初始化的时候会对类方法进行进一步加工处理，劫持里面的this对象指向state下面的子模块实例。
+
+[//]: # (3. 原型方法对应着定义模块类中的类方法， 初始化的时候会对类方法进行进一步加工处理，劫持里面的this对象指向state下面的子模块实例。)
 
 
 # 开始使用mtor
