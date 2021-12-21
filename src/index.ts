@@ -45,7 +45,7 @@ export { eventBus as evtBus} from './EventBus';
          }
 
          // 给外面用的原型实例
-         const prototype = {setData: undefined, reset: undefined, created: undefined};
+         const prototype = {setData: undefined, reset: undefined, created: undefined, eventBus, __origin: instance};
 
          // 给内部用的原型实例
          const _prototype = {setData: undefined, reset: undefined};
@@ -141,8 +141,9 @@ export { eventBus as evtBus} from './EventBus';
          // @ts-ignore
          prototype.reset = function () {
              const newObj = Object.create(allProto[ns]);
-             Object.getOwnPropertyNames(instance).forEach(key => {
-                 newObj[key] = instance[key];
+             const origin = allProto[ns].__origin;
+             Object.getOwnPropertyNames(origin).forEach(key => {
+                 newObj[key] = origin[key];
              });
              wiredList.forEach(key => {
                  newObj[key] = allState[__wired[key]];
