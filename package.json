@@ -1,6 +1,6 @@
 {
   "name": "mtor",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "react 模块化 依赖注入",
   "author": "sampsonli",
   "keywords": [
@@ -9,6 +9,7 @@
     "依赖注入",
     "按需加载",
     "模块化",
+    "react 数据流",
     "typescript"
   ],
   "homepage": "https://github.com/sampsonli/mtor",
@@ -20,7 +21,7 @@
   },
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
-  "npmName": "redux-spring",
+  "npmName": "mtor",
   "files": [
     "lib",
     "src"
