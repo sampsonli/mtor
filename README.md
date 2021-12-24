@@ -4,15 +4,23 @@
 [![npm version](https://img.shields.io/npm/v/mtor.svg?style=flat)](https://www.npmjs.com/package/mtor) 
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/sampsonli/mtor/blob/master/LICENSE)
 ----
-mtor 是一个基于react 单向数据流状态管理库， 对比主流redux，mbox数据管理库
-具有以下四大特色:
+mtor 是一个基于react 单向数据流状态管理库， 基于原生react hooks 进行了二次封装，对比原生react hooks:
+
+| 解决的问题   | react hooks                             | mtor                                              |
+|---------|-----------------------------------------|---------------------------------------------------|
+| 属性保存与修改 | 一个useState 只能有一个属性和一个改变属性发方法，无法同时修改多个属性 | <font color="green">可以同时对多个属性进行修改</font>          |
+| 可读性     | 随着组件规模增大，展示与业务逻辑混在一起，可读性直线降低， 也更容易出错    | ui展示与业务了逻辑分离，结构更清晰,<font color="green">可读性更好</font> |
+| 复用性     | 组件里面的业务逻辑不可复用                           | 模块中定义的业务逻辑<font color="green">可复用</font>          |
+| 数据共享    | 必须使用useContext，或属性传值，增加大量非业务代码          | 使用依赖注入， 多模块轻松实现<font color="green">共享/内部通信</font> |
+
+总结mtor具有以下四大特色:
 1. 模块化
 2. 面向对象
 3. 依赖注入
 4. 完美异步解决方案
 
 ### 模块化
-把所有数据， 操作集成在一个文件中，模块之间低耦合，逻辑更清晰易懂
+把所有数据、业务逻辑作集成在一个模块中，模块之间低耦合，更容易排查问题；
 
 ### 面向对象
 面向对象带来的好处不言而喻，网上有大量介绍。
@@ -22,17 +30,17 @@ mtor 是一个基于react 单向数据流状态管理库， 对比主流redux，
 此外， 完美支持typescript，更方便提供api文档
 ### 依赖注入
 mtor 基本理念参考了后端java 中spring框架， DI（依赖注入）核心思想。 所有model都是单实例的，统一由框架创建与维护， 模块之间可以相互依赖，
-由mtor自动注入，用户只需通过注解标注类型即可，这样模块之间数据共享就变得特别简单。
+由mtor自动注入，用户只需通过注解标注类型即可，这样模块之间数据/逻辑共享就变得特别简单。
 
 
 ### 异步操作
 异步操作在开发过程中特别常见， 基本上所有主流库都有不错的支持， 为什么称***完美***, 肯定有自己的一套特殊的解决方案，
-当遇到多个顺序异步操作， 而且异步操作之间有数据修改的情况下可以把修改的数据同步到页面中，而不需要做额外的操作，使得能够和面向对象思想完美融合。
+当遇到多个顺序异步操作， 而且异步操作之间有数据修改的情况下可以把修改的数据同步到页面中，而不需要做额外的操作，可以和面向对象思想完美融合。
 
 ### 其他
 1. 通用性，兼容性强， 完美支持taro， react-native 等使用react 场景；
-2. 模块跟随导入的页面加载， 无需单独注入；
-3. 开发模式热更新数据不会丢失， 包括类属性和静态属性；
+2. 模块跟随导入的页面加载而自动注册， 无需单独写注入逻辑；
+3. 完美的开发体验，热更新数据丢失， 包括类属性和静态属性；
 
 
 # 开始使用mtor
@@ -61,10 +69,10 @@ class HomeModel extends Model {
     num = 0;
 
     * init() { // init 对外暴露的是一个promis方法
-        this.num = yield ajax(); // yield 后面可以跟 promise
+        this.num = yield ajax(); // yield 后面跟随 promise实例
     }
 
-    add() {
+    add() { // 普通方法
         this.num ++;
     }
 }
@@ -79,25 +87,25 @@ export default HomeModel;
 7. ***注意*** 不管是普通方法，还是异步方法， 都不能定义为箭头方法， 否则会由于找不到this中的属性而报错；
 8. ***注意*** 保留字 setData, reset, ns, created不能用于自定义方法、属性名；
 9. ***注意*** 当修改模块中对象类型的属性时， 需要同时更新对象引用值。例如：
-```js
-@service(module.id)
-class DemoModel extends Model {
-    obj = {a: 1};
-
-    updateObj() {
-        this.obj.a = 2; // 错误的做法
+    ```js
+    @service(module.id)
+    class DemoModel extends Model {
+        obj = {a: 1};
+    
+        updateObj() {
+            this.obj.a = 2; // 错误的做法
+        }
+        updateObj2() {
+            this.obj = {...this.obj, a: 2}; // 正确的做法
+        }
     }
-    updateObj2() {
-        this.obj = {...this.obj, a: 2}; // 正确的做法
-    }
-}
-export default DemoModel;
-```
+    export default DemoModel;
+    ```
 
 
 ### 2. 在页面中使用 model
 > 页面引入model目前支支持方法组件，使用方法如下：
-- 使用react-hooks 写法
+- 目前只支持 hooks 写法
 ```jsx
 import React, {useEffect} from 'react';
 import {useModel} from 'mtor';
@@ -135,7 +143,7 @@ export default () => {
 ## 高级用法
 ### 1. 依赖注入（DI)
 > 以上案例基本上可以满足绝大部分业务需求, 但是有时候我们定义了多个model， model之间需要有数据共享， 在mtor 引入了依赖注入（Dependency Inject),
-> 模块之间可以相互依赖， 我们不需要手动去注入， 框架会根据配置自动注入进来。举个例子，还是在上面的案例中， HomeModel 依赖另外
+> 模块之间可以相互依赖， 我们不需要手动去注入， 框架会根据配置类型自动注入进来。举个例子，还是在上面的案例中， HomeModel 依赖另外
 > 一个UserModel, UserModel 中定义了name 属性， HomeModel 初始化后拿到UserModel中的name,并展示在页面中;
 
 ```js UserModel.js
@@ -162,13 +170,13 @@ class HomeModel extends Model {
     /**
      * 声明user类型
      * @type {UserModel}
-     * @private
      */
     @inject(UserModel) user;
 
     * init() {
         this.num = yield ajax();
-        this.username = this.user.name;
+        this.username = this.user.name; // 可以在model方法中直接使用
+        // this.user.name = 'sampsonli' // ***不可以***直接修改被注入属性中的值， 应该调用被注入属性中的方法修改其值
     }
 
     add() {
@@ -181,8 +189,8 @@ export default HomeModel;
 - 说明
 1. @inject(UserModel)，给属性注入UserModel 的实例；
 2. 注入的实例，类方法中可以获取实例属性， 也可以调用注入实例的方法， 但是不能直接修改实例的属性， 只能通过setData方法或者类方法去设置；
-3. 被注入的属性前面建议加上jsDoc注释，表明属性类型，方便后续使用实例属性和方法, 同时建议加@private， 不提供给组件直接使用；
-4. ***注意*** 在使用被注入的模块的属性前， 一定要确保被注入的模块的属性有值。
+3. 被注入的属性前面建议加上jsDoc注释，表明属性类型，方便后续使用实例属性和方法；
+
 
 
 最后在页面中展示数据
@@ -195,7 +203,7 @@ import HomeModel from '../../models/HomeModel';
 export default () => {
     const model = useModel(HomeModel);
     const {
-        num,username
+        num,username, user,
     } = model;
     useEffect(() => {
         model.init();
@@ -210,13 +218,16 @@ export default () => {
                     {num}
                 </div>
                 <div className={style.txt}>
-                    {username}
+                    {username}-{user.name}
                 </div>
             </div>
         </div>
     );
 };
 ```
+- 说明
+  1. 也可以直接使用被注入属性中的值， 当user数据有更新时，会同步到页面中
+
 ### 2. 初始化方法
 > 有时候会遇到这种场景， 模块加载的时候进行一些初始化操作（注意不是初始化值）， 初始化操作可以定义created方法来实现
 ```js
@@ -386,7 +397,7 @@ export default AsyncModel;
 1. 模块中所有异步方法可以理解为一个返回promise 实例的方法；
 2. <font color="red">***注意***</font> yield 关键字后面不要跟* 比如ajaxA 方法中 yield * this.ajaxC();
    
-3. 异步方法每执行一步yield， 所有数据修改都会同步到根state；
+3. 异步方法每执行一步yield， 所有数据修改都会同步到页面中；
 4. 如果不太关心执行过程中的数据同步问题， 或者一个异步方法中只有一步异步操作， 可以用async/await 替换generator方法。不过不建议这样做。
 
 ### 7. 异步方法异常处理
@@ -455,10 +466,9 @@ export default () => {
         }
         ```
     * 外部或者内部调用模块中异步方法的时候， 无法确定返回值为Promise类型， 需要强制转换， 使用起来没有async/await方便，前面已经提过了。
-2. 自动注入不支持方法参数注入， 目前只支持类属性注入，这点使用体验感觉不是特别好。
 
 
-3. 性能问题
+2. 性能问题
     * 调用模块方法的时候， 特别是异步方法， 底层存有多处数组遍历方法， 随着模块属性量增大， 计算复杂度呈线性增加。
     * 每次有数据更新， 都会重新生成整个model对象， 其中包括重新赋值prototype， 这里性能开销还是比较大的。
     
@@ -473,7 +483,6 @@ mtor 使用最佳实践参考 [最佳实践](https://github.com/sampsonli/mtor/b
 > 页面展示和数据可以进一步拆分， 页面中不包含任何逻辑处理， 数据层完全基于model；
 > 以面向对象的方式进行开发， 对外提供api接口和数据文档，并且一份model可以适配多平台，比如同时适配移动端h5 和pc端页面， 
 > 多人协作的时候， 可以把 ui设计 和 数据逻辑处理 完全交给不同人负责，高效完成需求， 同时可以保证代码风格统一。
-
 
 ### 3. 开发环境开启热更新
 > 正常情况下 webpack环境下的热更新， 会依据更改的文件，依次往上找依赖模块，直到找到调用过" module.hot.accept() "方法的模块，最后执行整体更新。 如果我们在开发的过程中，
