@@ -63,7 +63,7 @@ export declare const getModels: () => {};
  * @param initFnName - 模块类中方法名字符串, 默认init
  * @param clean - 是否在页面销毁的时候调用reset方法, 默认true
  */
-export declare const useInitModel: <T extends {
-    new (): Model;
+export declare const useInitModel: <T extends Model>(Clazz: {
+    new (): T;
     ns: string;
-}>(Clazz: T, initFnName?: string, clean?: boolean) => Model;
+}, initFnName?: string, clean?: boolean) => T;

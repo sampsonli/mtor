@@ -297,7 +297,7 @@ const tempObj = {};
  * @param initFnName - 模块类中方法名字符串, 默认init
  * @param clean - 是否在页面销毁的时候调用reset方法, 默认true
  */
-export const useInitModel = <T extends { new():Model, ns:string }>(Clazz: T, initFnName: string = 'init', clean: boolean = true) => {
+export const useInitModel = <T extends Model>(Clazz: { new():T, ns:string }, initFnName: string = 'init', clean: boolean = true): T => {
     const model = useModel(Clazz);
     useEffect(() => {
         if (tempObj[Clazz.ns]) {
