@@ -284,3 +284,33 @@ export function resource(ns: string) {
 export const getModels = () => {
      return allState;
  }
+
+
+/**
+ *  用于保存页面销毁前定时器清除方法回调
+ */
+const tempObj = {};
+/**
+ * 对useModel 方法二次封装的工具方法， 可以避免开发环境热更新重新调用初始化方法以及重置方法。
+ * 页面中实例化模块类，同时调用指定初始化方法，以及页面销毁的时候调用 reset方法
+ * @param Clazz - 模块类
+ * @param initFnName - 模块类中方法名字符串, 默认init
+ * @param clean - 是否在页面销毁的时候调用reset方法, 默认true
+ */
+export const useInitModel = <T extends { new():Model, ns:string }>(Clazz: T, initFnName: string = 'init', clean: boolean = true) => {
+    const model = useModel(Clazz);
+    useEffect(() => {
+        if (tempObj[Clazz.ns]) {
+            clearTimeout(tempObj[Clazz.ns]);
+        } else {
+            model[initFnName] && model[initFnName]();
+        }
+        return () => {
+            tempObj[Clazz.ns] = setTimeout(() => {
+                clean && model.reset();
+                delete tempObj[Clazz.ns];
+            }, 20);
+        };
+    }, []);
+    return model;
+}
