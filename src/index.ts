@@ -119,6 +119,7 @@ export function service(ns: string) {
         if (isHotReload) { // 热更新时候用得到
             initSyncState(allState[ns]);
             assign(toBeSyncState, initState);
+            syncFn(); // 强制触发一次更新
         }
         if (!isHotReload) { // 第一次加载初始化
             allState[ns] = initState;
