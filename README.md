@@ -42,6 +42,12 @@ mtor 基本理念参考了后端java 中spring框架， DI（依赖注入）核�
 2. 模块跟随导入的页面加载而自动注册， 无需单独写注入逻辑；
 3. 完美的开发体验，热更新数据丢失， 包括类属性和静态属性；
 
+# 2.0 对比1.0 有哪些改进
+1. 不用写繁琐的 generator 方法， 使用async/await, 更通用，更主流
+2. 对typescript 支持更友好， 实现100%完美支持；
+3. 底层做了大量优化， 性能更高效
+4. 异步操作可以使用方法回调直接修改数据， 不需要再次封装promise；
+
 
 # 开始使用mtor
 ## 安装
@@ -68,8 +74,8 @@ function ajax() { // 模拟ajax请求
 class HomeModel extends Model {
     num = 0;
 
-    * init() { // init 对外暴露的是一个promis方法
-        this.num = yield ajax(); // yield 后面跟随 promise实例
+    async init() { // init 对外暴露的是一个promis方法
+        this.num = await ajax(); // await 后面跟随 promise实例
     }
 
     add() { // 普通方法
@@ -81,7 +87,7 @@ export default HomeModel;
 1. @service('home') 定义一个模块， 每个模块必须添加此注解， 其中home 是自己给模块取的名称, 如果不想取名，也可直接用module.id， 比如@service(module.id);
 2. mtor 大量依赖最新注解语法， 需要配置相应babel插件(@babel/plugin-proposal-decorators)；
 3. Model 是个类接口， 主要是给model实例和类提供接口api和属性;
-4. init() 是一个异步方法，在mtor中异步方法都是基于 generator语法， 不推荐用async/await语法， generator和async/await使用方式一模一样；
+4. init() 是一个异步方法；
 5. add() 是定义的普通类方法， 此方法给类属性num 加1；
 6. num 是一个类属性， 页面中可以之间使用；
 7. ***注意*** 不管是普通方法，还是异步方法， 都不能定义为箭头方法， 否则会由于找不到this中的属性而报错；
@@ -171,10 +177,11 @@ class HomeModel extends Model {
      * 声明user类型
      * @type {UserModel}
      */
-    @inject(UserModel) user;
+    @inject(UserModel) 
+    user;
 
-    * init() {
-        this.num = yield ajax();
+    async init() {
+        this.num = await ajax();
         this.username = this.user.name; // 可以在model方法中直接使用
         // this.user.name = 'sampsonli' // ***不可以***直接修改被注入属性中的值， 应该调用被注入属性中的方法修改其值
     }
@@ -310,168 +317,9 @@ export default () => {
     );
 };
 ```
-### 5. 异步方法回调不能直接通过this 修改类属性
-> 有两种解决方案， 一种是直接通过setData 方法修改属性， 另外一种是通过初始化promise实例方案， 建议采用后者；
-- 直接修改
-```js
-@service(module.id)
-class HomeModel extends Model {
-   num = 0;
-   getDataByJQuery() {
-       $.ajax({
-            url: 'xxx',
-            method: 'get',
-            success: (resp) => {
-                // this.num = resp; // 直接修改num属性不生效
-                this.setData({num: resp}) // 可以通过直接调用setData方法来更新数据
-            }
-       })
-   }
-   add() {
-       this.num ++;
-   }
-}
-export default HomeModel;
-```
 
-- 封装Promise实例
-```js
-@service(module.id)
-class HomeModel extends Model {
-   num = 0;
-   * getDataByJQuery() {
-        this.num = yield new Promise((resolve) => {
-            $.ajax({
-                url: 'xxx',
-                method: 'get',
-                success: (resp) => {
-                    resolve(resp);
-                }
-            });
-        });
-   }
-   add() {
-       this.num ++;
-   }
-}
-export default HomeModel;
-```
-
-### 6. 同一个模块中异步方法可以相互调用
-> 假设有如下复杂场景， 同步方法init调用异步方法A, 异步方法A中顺序调用异步方法B, C, ..., 异步方法C 中调用同步方法D
-
-```js
-@service(module.id)
-class AsyncModel extends Model {
-    init() {
-        this.ajaxA();
-    }
-   * ajaxA() { // 顺序执行异步b,c, promise;
-        const ret = yield this.ajaxB(); // 可以有返回值
-        console.log(ret) // 123;
-        yield this.ajaxC();
-        yield Promise.resolve(22);
-   }
-   * ajaxB() {
-       // async body, 可以获取和设置this中的属性
-      return 123
-   }
-   * ajaxC() {
-       // async body, 可以获取和设置this中的属性
-        this.syncD();
-        // async body;
-        // yield this.ajaxE(); // 可以直接调用异步E方法。
-   }
-    syncD() {
-       // body
-    }
-    async ajaxE() {
-        // await promise;
-        // async body
-    }
-
-}
-export default AsyncModel;
-
-```
-1. 模块中所有异步方法可以理解为一个返回promise 实例的方法；
-2. <font color="red">***注意***</font> yield 关键字后面不要跟* 比如ajaxA 方法中 yield * this.ajaxC();
-   
-3. 异步方法每执行一步yield， 所有数据修改都会同步到页面中；
-4. 如果不太关心执行过程中的数据同步问题， 或者一个异步方法中只有一步异步操作， 可以用async/await 替换generator方法。不过不建议这样做。
-
-### 7. 异步方法异常处理
-> 以上案例均是正常处理逻辑，没有出任何异常情况， 但是实际开发中， 异常处理是避免不了的， mtor 对异常处理有比较好的支持。其用法和async/await 一致。比如：
-```js
-@service(module.id)
-class ExceptionModel extends Model {
-    init() {
-        this.ajaxA();
-        this.ajaxB().then((ret) => {
-        // convert(this.ajaxB()).then((ret) => { // ts需要借助convert转换类型
-            console.log('success') // 此处不会执行
-        }).catch((e) => {
-            console.log(e.message) // 打印error2
-        })
-    }
-   * ajaxA() {
-        try {
-            const ret = yield Promise.reject(new Error('error'));
-        } catch(e) {
-            console.log(e.message) // 打印error
-        }
-   }
-    * ajaxB() {
-        //throw new Error('error2') 可以直接抛出
-        const ret = yield Promise.reject(new Error('error2')); // 也可通过promise抛出
-        // return 语句不会执行
-        return ret;
-
-   }
-}
-export default ExceptionModel;
-
-```
-### 8. 外部调用模块异步方法接收其返回值
-> 以上面 ExceptionModel 为例， 如果页面中调用model中的ajaxA方法， 需要接收方法的返回值， 由于异步方法对外导出的是一个promise， 可以直接用async/await, 或者直接用then/catch方法
-
-```jsx
-export default () => {
-    const model = useModel(ExceptionModel);
-    useEffect(() => {
-        model.ajaxB().then((ret) => console.log(ret)).catch(e => console.log(e.message)); // 打印 error2， 如果项目中使用ts， 会报错， 可以用下面的方法实现
-        // convert(model.ajaxB()).then((ret) => console.log(ret)).catch(e => console.log(e.message)); // ts写法
-    }, []);
-    return (
-        <div className={style.container} />
-    );
-};
-```
-- 注意， 如果你项目中是用的ts， 可能会编译不通过， 可以借助convert 方法转换到Promise类型。
-## 存在的问题
-> mtro 存在很多不足， 以下是个人总结的一些问题， 也是接下来改进的方向， 如果有什么好的建议或想法， 欢迎给我留言。
-1. typescript 对generator支持不够理想
-    * 比如yield 返回参数无法做自动类型推导， 但是不影响其愉快使用。
-        ```typescript
-        class Test {
-            * testFn() {
-                // 此处 a 类型为any， 无法自动推导a为 string 类型
-                const a = yield new Promise<string>((resolve) => resolve('123'));
-                
-                // 可以声明的时候指定其类型
-                const b:string = yield new Promise<string>((resolve) => resolve('123'));
-               
-            }
-        
-        }
-        ```
-    * 外部或者内部调用模块中异步方法的时候， 无法确定返回值为Promise类型， 需要强制转换， 使用起来没有async/await方便，前面已经提过了。
-
-
-2. 性能问题
-    * 调用模块方法的时候， 特别是异步方法， 底层存有多处数组遍历方法， 随着模块属性量增大， 计算复杂度呈线性增加。
-    * 每次有数据更新， 都会重新生成整个model对象， 其中包括重新赋值prototype， 这里性能开销还是比较大的。
-    
+## 从1.0 迁移到2.0
+> 只需要把 generator方法改为 async / await 即可
 
 
 ## 最佳实践

@@ -55,10 +55,10 @@ export declare const getModels: () => {};
  * 对useModel 方法二次封装的工具方法， 可以避免开发环境热更新重新调用初始化方法以及重置方法。
  * 页面中实例化模块类，同时调用指定初始化方法，以及页面销毁的时候调用 reset方法
  * @param Clazz - 模块类
- * @param initFn - 模块类中方法名字符串或方法回调, 默认“init”
+ * @param initFn - 模块类中方法名字符串或方法回调
  * @param clean - 是否在页面销毁的时候调用reset方法, 默认true
  */
 export declare const useInitModel: <T extends Model>(Clazz: {
     new (): T;
     ns: string;
-}, initFn?: string | ((args: T) => any), clean?: boolean) => T;
+}, initFn: (args: T) => any, clean?: boolean) => T;
