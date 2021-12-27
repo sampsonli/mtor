@@ -1,4 +1,4 @@
-import {convert, inject, Model, service, getModels} from '../src'
+import {inject, Model, service, getModels} from '../src'
 
 describe('model async function test', function () {
     it('test model async func', (done) => {
@@ -6,8 +6,8 @@ describe('model async function test', function () {
         @service(modelName)
         class UserModel extends Model {
             name = 100;
-            * ajax() {
-                this.name = yield new Promise((resolve) => {
+            async ajax() {
+                this.name = await new Promise((resolve) => {
                     // resolve(19);
                     setTimeout(() => {
                         resolve(19)
@@ -20,7 +20,7 @@ describe('model async function test', function () {
 
         let model = getModels()[modelName];
         expect(model.name).toBe(100);
-        convert(model.ajax()).then((name) => {
+        model.ajax().then((name) => {
             expect(name).toBe(19);
             model = <UserModel> getModels()[modelName];
             expect(model.name).toBe(19);
@@ -33,13 +33,13 @@ describe('model async function test', function () {
         @service(modelName)
         class UserModel extends Model {
             num = 1;
-            * setNum() {
+            async setNum() {
                 this.num = 2;
-                this.num = yield this.ajax();
+                this.num = await this.ajax();
                 return this.num;
             }
-            * ajax() {
-                return yield new Promise((resolve) => {
+             ajax() {
+                return new Promise<number>((resolve) => {
                     // resolve(19);
                     setTimeout(() => {
                         resolve(19)
@@ -51,7 +51,7 @@ describe('model async function test', function () {
 
         let model = <UserModel> getModels()[modelName];
         expect(model.num).toBe(1);
-        convert(model.setNum()).then((num) => {
+        model.setNum().then((num) => {
             expect(num).toBe(19);
             done()
 
@@ -63,10 +63,10 @@ describe('model async function test', function () {
         @service(modelName)
         class UserModel extends Model {
             num = 1;
-            * ajax() {
+            async ajax() {
                 try {
                     this.num = 2;
-                    yield Promise.reject(new Error('hello'));
+                    await Promise.reject(new Error('hello'));
                     this.num = 3;
                 } catch (e) {
                     this.num = 5;
@@ -78,7 +78,7 @@ describe('model async function test', function () {
 
         let model = <UserModel> getModels()[modelName];
         expect(model.num).toBe(1);
-        convert(model.ajax()).then((num) => {
+        model.ajax().then((num) => {
             model = <UserModel> getModels()[modelName];
             expect(model.num).toBe(5);
             expect(num).toBe(6);
