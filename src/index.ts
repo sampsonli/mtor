@@ -36,13 +36,17 @@ export function service(ns: string) {
         // 给外面用的原型实例
         const prototype = {setData: undefined, reset: undefined, created: undefined, __origin: instance};
 
+        // 是否正在同步标志位
         let isSyncing = false;
-        let toBeSyncState: {_state: any};
+        let toBeSyncState; // 内部this, 对this 的如何修改都会同步到_toBeSyncState中
+        let _toBeSyncState; // 真正保存中间数据的对象
+        // 同步方法
         const syncFn = () => {
             if(isSyncing) return; // 节流
             Promise.resolve().then(() => {
+                // 重新实例化对象
                 const newObj = Object.create(allProto[ns]);
-                assign(newObj, toBeSyncState._state);
+                assign(newObj, _toBeSyncState);
                 allState[ns] = newObj;
                 eventBus.emit(TYPE, newObj);
                 isSyncing = false;
@@ -58,17 +62,14 @@ export function service(ns: string) {
             }
         });
 
-        // @ts-ignore
         prototype.setData = function (props: Object) {
-            assign(toBeSyncState, props)
+            assign(toBeSyncState, props);
         };
         const initState = Object.create(prototype);
-
 
         /**
          * 重置模块数据到初始状态， 一般用于组件销毁的时候调用
          */
-        // @ts-ignore
         prototype.reset = function () {
             const newObj = Object.create(allProto[ns]);
             const origin = allProto[ns].__origin;
@@ -88,7 +89,6 @@ export function service(ns: string) {
             initState[key] = allState[__wired[key]];
         });
 
-        // eventBus.on(TYPE, (state) => allState[ns] = state);
         allEvents[ns] = allEvents[ns] || {};
         const events = allEvents[ns];
         wiredList.forEach((key) => {
@@ -102,16 +102,16 @@ export function service(ns: string) {
 
         const initSyncState = (state = allState[ns]) => {
             toBeSyncState = Object.create(prototype);
-            toBeSyncState._state = state;
+            _toBeSyncState = {...state};
             Object.keys(state).forEach(key => {
                 Object.defineProperty(toBeSyncState, key, {
                     set: (value) => {
                         if (value !== toBeSyncState[key]) {
-                            toBeSyncState._state[key] = value;
+                            _toBeSyncState[key] = value;
                             syncFn();
                         }
                     },
-                    get: () => toBeSyncState._state[key],
+                    get: () => _toBeSyncState[key],
                 })
             });
         }
@@ -120,15 +120,12 @@ export function service(ns: string) {
             initSyncState(allState[ns]);
             assign(toBeSyncState, initState);
             syncFn(); // 强制触发一次更新
-        }
-        if (!isHotReload) { // 第一次加载初始化
+            assign(Clazz, allStatic[ns]);
+        } else {
             allState[ns] = initState;
             initSyncState(initState);
             allStatic[ns] = assign({}, Clazz);
-        } else {
-            assign(Clazz, allStatic[ns]);
         }
-
 
         allProto[ns] = prototype;
         // 初始化提供created 方法调用, 热更新不重复调用
