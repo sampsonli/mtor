@@ -40,7 +40,7 @@ export function service(ns: string) {
         let isSyncing = false;
         let toBeSyncState; // 内部this, 对this 的如何修改都会同步到_toBeSyncState中
         let _toBeSyncState; // 真正保存中间数据的对象
-        // 同步方法
+        // 同步数据方法
         const syncFn = () => {
             if(isSyncing) return; // 节流
             Promise.resolve().then(() => {
@@ -100,6 +100,7 @@ export function service(ns: string) {
             wiredList.forEach(key => {
                 newObj[key] = allState[__wired[key]];
             });
+            initSyncState(newObj);
             assign(toBeSyncState, newObj)
         };
         const finalInstance = allState[ns] || instance;
