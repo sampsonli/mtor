@@ -101,7 +101,8 @@ export function service(ns: string) {
                 newObj[key] = allState[__wired[key]];
             });
             initSyncState(newObj);
-            assign(toBeSyncState, newObj)
+            allState[ns] = newObj;
+            eventBus.emit(TYPE, newObj);
         };
         const finalInstance = allState[ns] || instance;
         Object.getOwnPropertyNames(instance).forEach(key => {
