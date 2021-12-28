@@ -63,7 +63,28 @@ export function service(ns: string) {
         });
 
         prototype.setData = function (props: Object) {
-            assign(toBeSyncState, props);
+            const toBeAdd = Object.keys(props).filter((key) => !Object.getOwnPropertyDescriptor(_toBeSyncState, key));
+            if(toBeAdd.length) { // 注册新属性
+                toBeAdd.forEach(key => {
+                    Object.defineProperty(toBeSyncState, key, {
+                        set: (value) => {
+                            if (value !== toBeSyncState[key]) {
+                                _toBeSyncState[key] = value;
+                                syncFn();
+                            }
+                        },
+                        get: () => _toBeSyncState[key],
+                    })
+                });
+            }
+            if(Object.keys(props).some(key => props[key] !== _toBeSyncState[key])) { // 判断有没有修改
+                // 重新实例化对象， 同步设置
+                const newObj = Object.create(allProto[ns]);
+                assign(_toBeSyncState, props);
+                assign(newObj, _toBeSyncState);
+                allState[ns] = newObj;
+                eventBus.emit(TYPE, newObj);
+            }
         };
         const initState = Object.create(prototype);
 
