@@ -1,31 +1,32 @@
 # mtor 是什么？
 
 [comment]: <> ([![Build Status]&#40;https://travis-ci.org/sampsonli/mtor.svg?branch=master&#41;]&#40;https://travis-ci.org/sampsonli/mtor&#41;)
-[![npm version](https://img.shields.io/npm/v/mtor.svg?style=flat)](https://www.npmjs.com/package/mtor) 
+[![npm version](https://img.shields.io/npm/v/mtor.svg?style=flat)](https://www.npmjs.com/package/mtor)
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/sampsonli/mtor/blob/master/LICENSE)
 ----
 mtor 是一个基于react 单向数据流状态管理库， 基于原生react hooks 进行了二次封装，对比原生react hooks:
 
-| 解决的问题   | react hooks                             | mtor                                              |
-|---------|-----------------------------------------|---------------------------------------------------|
-| 属性保存与修改 | 一个useState 只能有一个属性和一个改变属性发方法，无法同时修改多个属性 | <font color="green">可以同时对多个属性进行修改</font>          |
-| 可读性     | 随着组件规模增大，展示与业务逻辑混在一起，可读性直线降低， 也更容易出错    | ui展示与业务了逻辑分离，结构更清晰,<font color="green">可读性更好</font> |
-| 复用性     | 组件里面的业务逻辑不可复用                           | 模块中定义的业务逻辑<font color="green">可复用</font>          |
-| 数据共享    | 必须使用useContext，或属性传值，增加大量非业务代码          | 使用依赖注入， 多模块轻松实现<font color="green">共享/内部通信</font> |
+| 解决的问题   | react hooks                                | mtor                                                |
+|---------|--------------------------------------------|-----------------------------------------------------|
+| 属性保存与修改 | 一个useState 只能有一个属性和一个改变属性发方法，无法同时修改多个属性    | <font color="green">可以同时对多个属性进行修改</font>            |
+| 可读性     | 随着组件规模增大，展示与业务逻辑混在一起，可读性直线降低， 也更容易出错       | ui展示与业务了逻辑分离，结构更清晰,<font color="green">可读性更好</font> |
+| 复用性     | 组件里面的业务逻辑不可复用                              | 模块中定义的业务逻辑<font color="green">可复用</font>            |
+| 数据共享    | 必须使用useContext，或属性传值，增加大量非业务代码             | 使用依赖注入， 多模块轻松实现<font color="green">共享/内部通信</font>   |
+| 开发体验    | 热更新，所有state丢失，useMemo,useCallback,依赖项很容易出错 | 热更新 数据保留，不用关心依赖项更新问题                                |
 
 总结mtor具有以下四大特色:
 1. 模块化
 2. 面向对象
 3. 依赖注入
-4. 完美异步解决方案
+4. 异步处理
 
 ### 模块化
 把所有数据、业务逻辑作集成在一个模块中，模块之间低耦合，更容易排查问题；
 
 ### 面向对象
-面向对象带来的好处不言而喻，网上有大量介绍。
- 总的来说， 在数据层面上，更适合基于面向对象开发，展示层面用方法组件而不是类组件， 再配合react hooks新特性，二者可以完美融合。
- 我们可以把页面展示和数据流处理剥离开来， 甚至前端开发可以进一步拆分： “静态页面” 与 “数据处理” 两大块。
+所有状态，方法封装成一个类，在方法中操作状态。
+总的来说， 在数据层面上，更适合基于面向对象开发，展示层面用方法组件而不是类组件， 再配合react hooks新特性，二者可以完美融合。
+我们可以把页面展示和数据流处理剥离开来， 甚至前端开发可以进一步拆分： “静态页面” 与 “数据处理” 两大块。
 一套数据流处理可以同时应用到多场合，比如pc/h5/小程序/react-native。
 此外， 完美支持typescript，更方便提供api文档
 ### 依赖注入
@@ -34,19 +35,19 @@ mtor 基本理念参考了后端java 中spring框架， DI（依赖注入）核�
 
 
 ### 异步操作
-异步操作在开发过程中特别常见， 基本上所有主流库都有不错的支持， 为什么称***完美***, 肯定有自己的一套特殊的解决方案，
-当遇到多个顺序异步操作， 而且异步操作之间有数据修改的情况下可以把修改的数据同步到页面中，而不需要做额外的操作，可以和面向对象思想完美融合。
+异步操作在开发过程中特别常见，mtor对异步方法做了对开发体验做了大量优化， 不像mbox等库异步完一定要在runInAction 回调中处理
+而且当遇到多个顺序异步操作， 假如异步操作之间有数据修改的情况下可以把修改的数据实时反馈到页面中，而不需要做额外的操作，可以与面向对象思想完美相结合。
 
 ### 其他
 1. 通用性，兼容性强， 完美支持taro， react-native 等使用react 场景；
 2. 模块跟随导入的页面加载而自动注册， 无需单独写注入逻辑；
-3. 完美的开发体验，热更新数据丢失， 包括类属性和静态属性；
+3. 完美的开发体验，热更新数据不丢失， 包括类属性和静态属性；
 
 # 2.0 对比1.0 有哪些改进
-1. 不用写繁琐的 generator 方法， 使用async/await, 更通用，更主流
+1. 不用写繁琐的 generator 方法， 使用async/await, 更通用，更主流；
 2. 对typescript 支持更友好， 实现100%完美支持；
-3. 底层做了大量优化， 性能更高效
-4. 异步操作可以使用方法回调直接修改数据， 不需要再次封装promise；
+3. 底层做了大量优化， 性能更高效；
+4. 普通异步操作可以直接通过this修改数据， 不需要再次封装promise；
 
 
 # 开始使用mtor
@@ -74,8 +75,8 @@ function ajax() { // 模拟ajax请求
 class HomeModel extends Model {
     num = 0;
 
-    async init() { // init 对外暴露的是一个promis方法
-        this.num = await ajax(); // await 后面跟随 promise实例
+    async init() {
+        this.num = await ajax();
     }
 
     add() { // 普通方法
@@ -107,11 +108,20 @@ export default HomeModel;
     }
     export default DemoModel;
     ```
+10. ***注意*** 使用属性前，必须先在类中先声明， 否则动态添加的属性不生效
+    ```js
+    @service(module.id)
+    class DemoModel extends Model {
+        setA() {
+            this.a = 111;  // 此处修改不会反馈到页面中
+        }   
+    }
+    export default DemoModel;
+    ```
 
 
-### 2. 在页面中使用 model
-> 页面引入model目前支支持方法组件，使用方法如下：
-- 目前只支持 hooks 写法
+### 2. 在页面中使用 model (useModel)
+> 页面引入model目前仅支持方法组件，使用方法如下：
 ```jsx
 import React, {useEffect} from 'react';
 import {useModel} from 'mtor';
@@ -142,79 +152,24 @@ export default () => {
 
 ```
 - 说明
-1. model 中包含模块中定义的数据和方法；
+1. model 中包含模块中定义的属性和方法；
 2. 获取model 实例通过 useModel方法 ,传入Model类即可；
-3. model中所有方法已经绑定过this了， 可以单独拿出来直接调用；
+3. model中所有方法已经绑定过this了， 可以单独拿出来直接使用；
 
-## 高级用法
-### 1. 依赖注入（DI)
-> 以上案例基本上可以满足绝大部分业务需求, 但是有时候我们定义了多个model， model之间需要有数据共享， 在mtor 引入了依赖注入（Dependency Inject),
-> 模块之间可以相互依赖， 我们不需要手动去注入， 框架会根据配置类型自动注入进来。举个例子，还是在上面的案例中， HomeModel 依赖另外
-> 一个UserModel, UserModel 中定义了name 属性， HomeModel 初始化后拿到UserModel中的name,并展示在页面中;
+### 3. 在页面中使用 model (useModel 二次封装版 useInitModel)
 
-```js UserModel.js
-import {Model, service} from 'mtor';
-
-@service('usermodel')
-class UserModel extends Model {
-  name = 'hello user';
-}
-export default UserModel;
-``` 
-- 此处定义了UserModel, 里面有name 属性
-
-
-
-```js HomeModel.js
-import UserModel from './UserModel';
-@service('home')
-//@service(module.id) // 也可以直接使用模块标识
-class HomeModel extends Model {
-    num = 0;
-    username;
-    
-    /**
-     * 声明user类型
-     * @type {UserModel}
-     */
-    @inject(UserModel) 
-    user;
-
-    async init() {
-        this.num = await ajax();
-        this.username = this.user.name; // 可以在model方法中直接使用
-        // this.user.name = 'sampsonli' // ***不可以***直接修改被注入属性中的值， 应该调用被注入属性中的方法修改其值
-    }
-
-    add() {
-        this.num ++;
-    }
-}
-export default HomeModel;
-
-```
-- 说明
-1. @inject(UserModel)，给属性注入UserModel 的实例；
-2. 注入的实例，类方法中可以获取实例属性， 也可以调用注入实例的方法， 但是不能直接修改实例的属性， 只能通过setData方法或者类方法去设置；
-3. 被注入的属性前面建议加上jsDoc注释，表明属性类型，方便后续使用实例属性和方法；
-
-
-
-最后在页面中展示数据
 ```jsx
 import React, {useEffect} from 'react';
 import {useModel} from 'mtor';
 import style from './style.less';
 import HomeModel from '../../models/HomeModel';
+import {useInitModel} from "./index";
 
 export default () => {
-    const model = useModel(HomeModel);
+    const model = useInitModel(HomeModel, () => model.init(), true);
     const {
-        num,username, user,
+        num,
     } = model;
-    useEffect(() => {
-        model.init();
-    }, []);
     return (
         <div className={style.container}>
             <div className={style.content}>
@@ -224,16 +179,106 @@ export default () => {
                 <div className={style.txt}>
                     {num}
                 </div>
-                <div className={style.txt}>
-                    {username}-{user.name}
-                </div>
             </div>
         </div>
     );
 };
+
 ```
 - 说明
-  1. 也可以直接使用被注入属性中的值， 当user数据有更新时，会同步到页面中
+1. useInitModel 底层基于useModel， useEffect 的二次封装方法;
+2. 第二个参数是第一次加载初始化方法，第三个参数是退出是否调用reset方法；
+3. useInitModel开发模式做了优化， 页面热更新的时候不会再次调用reset 与初始化方法；
+
+
+
+## 高级用法
+### 1. 依赖注入（DI)
+> 以上案例基本上可以满足绝大部分业务需求, 但是有时候我们定义了多个model， model之间需要有数据共享， 在mtor 引入了依赖注入（Dependency Inject),
+> 模块之间可以相互依赖， 框架会根据配置类型自动注入进来。举个例子，还是在上面的案例中， HomeModel 依赖另外
+> 一个UserModel, UserModel 中定义了name 属性， HomeModel 初始化后拿到UserModel中的name,并展示在页面中;
+
+1. 定义需要依赖的model
+    ```js UserModel.js
+    import {Model, service} from 'mtor';
+    
+    @service('usermodel')
+    class UserModel extends Model {
+      name = 'hello user';
+    }
+    export default UserModel;
+    ``` 
+- 此处定义了UserModel, 里面有name 属性
+
+2. 定义准备依赖的model
+    ```js HomeModel.js
+    import UserModel from './UserModel';
+    @service('home')
+    //@service(module.id) // 也可以直接使用模块标识
+    class HomeModel extends Model {
+        num = 0;
+        username;
+        
+        /**
+         * 声明user类型
+         * @type {UserModel}
+         */
+        @inject(UserModel) 
+        user;
+    
+        async init() {
+            this.num = await ajax();
+            this.username = this.user.name; // 可以在model方法中直接使用
+            // this.user.name = 'sampsonli' // ***不可以***直接修改被注入属性中的值， 应该调用被注入属性中的方法修改其值
+        }
+    
+        add() {
+            this.num ++;
+        }
+    }
+    export default HomeModel;
+    
+    ```
+    - 说明
+    1. @inject(UserModel)，给属性注入UserModel 的实例；
+    2. 注入的实例，类方法中可以获取实例属性， 也可以调用注入实例的方法， 但是不能直接修改实例的属性， 只能通过setData方法或者类方法去设置；
+    3. 如果使用es语法，被注入的属性前面建议加上jsDoc注释，表明属性类型，方便后续使用实例属性和方法；
+
+
+3. 最后在页面中展示数据
+    ```jsx
+    import React, {useEffect} from 'react';
+    import {useModel} from 'mtor';
+    import style from './style.less';
+    import HomeModel from '../../models/HomeModel';
+    
+    export default () => {
+        const model = useModel(HomeModel);
+        const {
+            num,username, user,
+        } = model;
+        useEffect(() => {
+            model.init();
+        }, []);
+        return (
+            <div className={style.container}>
+                <div className={style.content}>
+                    <div className={style.addOne} onClick={model.add}>
+                        +1
+                    </div>
+                    <div className={style.txt}>
+                        {num}
+                    </div>
+                    <div className={style.txt}>
+                        {username}-{user.name}
+                    </div>
+                </div>
+            </div>
+        );
+    };
+    ```
+    - 说明
+        1. 也可以直接使用被注入属性中的属性值， 当user数据有更新时，会同步到页面中
 
 ### 2. 初始化方法
 > 有时候会遇到这种场景， 模块加载的时候进行一些初始化操作（注意不是初始化值）， 初始化操作可以定义created方法来实现
@@ -286,7 +331,7 @@ export default () => {
 };
 ```
 - 用 model.setData({num: num + 1}) 取代 model.add 方法， 可以减少代码量， 但是缺点是每次页面渲染都会生成一个新方法， 可能对性能优化不是很友好， 具体取舍看业务场景吧！
-setData 所设置的属性名尽量是模块类中存在的属性， 比如上例 setData({num2: 33}) 设置一个新属性num2, 虽然运行没问题， 但是不提倡这样写。 
+  setData 所设置的属性名尽量是模块类中存在的属性， 比如上例 setData({num2: 33}) 设置一个新属性num2, 虽然运行没问题， 但是不提倡这样写。
 
 ### 4. 重置model中的所有数据到初始值
 > 组件销毁的时候， 我们要清空现有的数据， 我们可以调用 model.reset；
@@ -329,7 +374,7 @@ mtor 使用最佳实践参考 [最佳实践](https://github.com/sampsonli/mtor/b
 > 不适用于循环列表项中的复杂组件。
 ### 2. ui展示层与数据分离
 > 页面展示和数据可以进一步拆分， 页面中不包含任何逻辑处理， 数据层完全基于model；
-> 以面向对象的方式进行开发， 对外提供api接口和数据文档，并且一份model可以适配多平台，比如同时适配移动端h5 和pc端页面， 
+> 以面向对象的方式进行开发， 对外提供api接口和数据文档，并且一份model可以适配多平台，比如同时适配移动端h5 和pc端页面，
 > 多人协作的时候， 可以把 ui设计 和 数据逻辑处理 完全交给不同人负责，高效完成需求， 同时可以保证代码风格统一。
 
 ### 3. 开发环境开启热更新
