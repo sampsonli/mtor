@@ -8,24 +8,24 @@ mtor 是一个基于react 类响应式数据流状态管理库， 本身是基�
 
 | 问题   | react hooks                                 | mtor                                                |
 |---------|---------------------------------------------|-----------------------------------------------------|
-| 属性保存与修改 | 一个useState 只能有一个属性和一个改变属性发方法，无法同时修改多个属性     | <font color="green">可以同时对多个属性进行修改</font>            |
-| 可读性     | 随着组件规模增大，展示与业务逻辑混在一起，可读性直线降低， 也更容易出错        | ui展示与业务了逻辑分离，结构更清晰,<font color="green">可读性更好</font> |
-| 复用性     | 组件里面的业务逻辑不可复用                               | 模块中定义的业务逻辑<font color="green">可复用</font>            |
+| 属性保存与修改 | 一个useState 只能管理一个属性             | <font color="green">是用setData方法可以同时对多个属性进行修改</font> |
+| 可读性     | 随着组件规模增大，展示与业务逻辑混在一起，可读性直线降低， 也更容易出错  | ui展示与业务了逻辑分离，结构更清晰,<font color="green">可读性更好</font> |
+| 复用性     | 组件里面的业务逻辑不可复用                 | 整个模块都可<font color="green">可复用</font>                |
 | 数据共享    | 必须使用useContext，或属性传值，增加大量非业务代码              | 使用依赖注入， 多模块轻松实现<font color="green">共享/内部通信</font>   |
 | 开发体验    | 热更新，所有state丢失，useMemo,useCallback,等依赖项很容易出错 | 热更新 数据保留，不用关心依赖项更新问题                                |
 -------------
 
-mobx也是基于响应式数据流， 在写法，底层实现和MobX有十分相像，对比
+mobx也是基于响应式数据流， 在写法，底层实现和MobX有十分相像，对比：
 
-| 问题   | MobX                                  | mtor                         |
-|------------|---------------------------------------|------------------------------|
-| 易用性 | api比较多，配置项也比较多， 容易出错， 且相对难以快速上手       | api较少，直接引用直接上手，且不容易出错        |
-| 可读性     | 可读性一般                                 | 完全基于面向对象， 可读性非常高             |
-| 申明状态     | 需要添加observable注解， 不够灵活                | 直接在类中声明属性即可                  |
-| 异步方法支持    | 每次异步操作完， 回调数据操作必须包装在runInAction, 很不灵活 | 不管在任何地方， 只要在类中， 直接通过this，修改属性 |
-| 数据依赖    | 模块依赖，需要写很多非业务代码                       | 直接使用依赖注入即可，非常方便，不影响代码可读性     |
+| 问题     | MobX                                  | mtor                         |
+|--------|---------------------------------------|------------------------------|
+| 易用性    | api比较多，配置项也比较多， 容易出错， 且相对难以快速上手       | api较少，直接引用直接上手，且不容易出错        |
+| 可读性    | 可读性一般                                 | 完全基于面向对象， 可读性非常高             |
+| 申明状态   | 需要添加observable注解， 不够灵活                | 直接在类中声明属性即可                  |
+| 异步回调   | 每次异步操作完， 回调数据操作必须包装在runInAction, 很不灵活 | 不管在任何地方， 只要在类中， 直接通过this修改属性 |
+| 模块相互依赖 | 支持得不是很好， 需要写很多非业务代码                   | 直接使用依赖注入即可，非常方便，不影响代码可读性     |
 
-总结mtor具有以下四大特色:
+总结 mtor 具有以下四大特点:
 1. 模块化
 2. 面向对象
 3. 依赖注入
@@ -76,7 +76,7 @@ function ajax() { // 模拟ajax请求
     return new Promise((resolve) => {
         setTimeout(() => {
             resolve(parseInt(Math.random() * 10, 10));
-        }, 16);
+        }, 16.7);
     });
 }
 @service('home')
@@ -141,27 +141,14 @@ export default () => {
 ### 3. 在页面中使用 model (useModel 二次封装版 useInitModel)
 > 在上面案例中使用useModel写法 每次页面加载都会重新执行init方法， 如果开发情况下， 修改了页面， 会导致页面热跟新，其实并不需要再次执行init方法， 可以用useInitModel 取代 useModel， 方法如下： 
 ```jsx
-import React, {useEffect} from 'react';
-import {useModel} from 'mtor';
-import style from './style.less';
-import HomeModel from '../../models/HomeModel';
-import {useInitModel} from "./index";
-
 export default () => {
     const model = useInitModel(HomeModel, () => model.init(), true);
     const {
         num,
     } = model;
     return (
-        <div className={style.container}>
-            <div className={style.content}>
-                <div className={style.addOne} onClick={model.add}>
-                    +1
-                </div>
-                <div className={style.txt}>
-                    {num}
-                </div>
-            </div>
+        <div>
+            {/* // 业务代码   */}
         </div>
     );
 };
@@ -292,7 +279,6 @@ export default () => {
     export default DemoModel;
     ```
 
-
 ### 3. 初始化方法
 > 有时候会遇到这种场景， 模块加载的时候进行一些初始化操作（注意不是初始化值）， 初始化操作可以定义created方法来实现
 ```js
@@ -301,12 +287,12 @@ class CreatedModel extends Model {
     num = 0;
     constructor() { // 构造方法只能初始化变量
         this.num = 1;
-        // this.ajaxGet()// 不能调用模块中的方法
+        // this.ajaxGet()// 不能直接调用模块中的方法
     }
     ajaxGet() {
         // 方法逻辑
     }
-    created() { // 如果定义了created方法，此方法在模块加载的时候会自动执行
+    created() { // 如果定义了created方法，此方法在模块加载的时候会自动执行（注意，热跟新的时候也不会执行哦。。。）
         thia.ajaxGet() // 此方法中可以调用模块中的方法进行初始化
     }
 }
@@ -436,6 +422,10 @@ cd node_modules/mtor
 npm install
 npm run build
 ```
-# 八、参考项目
+
+# 八、一起维护
+欢迎大家pull request 贡献自己的代码、提取宝贵意见。
+# 九、参考模板项目
 一个整合最新react17+webpack5通用模板项目[react_template_project](https://github.com/sampsonli/react_template_project)
+此项目本人会不断维护更新，以最佳实践去使用 mtor。 大家也可以贡献自己的代码到这个项目中。
 
