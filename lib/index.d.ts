@@ -64,4 +64,4 @@ export declare const getModels: () => {};
 export declare const useInitModel: <T extends Model>(Clazz: {
     new (): T;
     ns: string;
-}, initFn: (args: T) => any, clean?: boolean) => T;
+}, initFn?: (args: T) => any, clean?: boolean) => T;
