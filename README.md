@@ -69,8 +69,6 @@ function ajax() { // 模拟ajax请求
         }, 16);
     });
 }
-
-
 @service('home')
 class HomeModel extends Model {
     num = 0;
@@ -85,39 +83,13 @@ class HomeModel extends Model {
 }
 export default HomeModel;
 ~~~
+-说明
 1. @service('home') 定义一个模块， 每个模块必须添加此注解， 其中home 是自己给模块取的名称, 如果不想取名，也可直接用module.id， 比如@service(module.id);
 2. mtor 大量依赖最新注解语法， 需要配置相应babel插件(@babel/plugin-proposal-decorators)；
 3. Model 是个类接口， 主要是给model实例和类提供接口api和属性;
 4. init() 是一个异步方法；
 5. add() 是定义的普通类方法， 此方法给类属性num 加1；
 6. num 是一个类属性， 页面中可以之间使用；
-7. ***注意*** 不管是普通方法，还是异步方法， 都不能定义为箭头方法， 否则会由于找不到this中的属性而报错；
-8. ***注意*** 保留字 setData, reset, ns, created不能用于自定义方法、属性名；
-9. ***注意*** 当修改模块中对象类型的属性时， 需要同时更新对象引用值。例如：
-    ```js
-    @service(module.id)
-    class DemoModel extends Model {
-        obj = {a: 1};
-    
-        updateObj() {
-            this.obj.a = 2; // 错误的做法
-        }
-        updateObj2() {
-            this.obj = {...this.obj, a: 2}; // 正确的做法
-        }
-    }
-    export default DemoModel;
-    ```
-10. ***注意*** 使用属性前，必须先在类中先声明， 否则动态添加的属性不生效
-    ```js
-    @service(module.id)
-    class DemoModel extends Model {
-        setA() {
-            this.a = 111;  // 此处修改不会反馈到页面中
-        }   
-    }
-    export default DemoModel;
-    ```
 
 
 ### 2. 在页面中使用 model (useModel)
@@ -190,6 +162,34 @@ export default () => {
 2. 第二个参数是第一次加载初始化方法，第三个参数是退出是否调用reset方法；
 3. useInitModel开发模式做了优化， 页面热更新的时候不会再次调用reset 与初始化方法；
 
+## 定义model注意事项
+1. 不管是普通方法，还是异步方法， 都不能定义为箭头方法， 否则会由于找不到this中的属性而报错；
+2. 保留字 setData, reset, ns, created不能用于自定义方法、属性名；
+3. 当修改模块中对象类型的属性时， 需要同时更新对象引用值。例如：
+    ```js
+    @service(module.id)
+    class DemoModel extends Model {
+        obj = {a: 1};
+    
+        updateObj() {
+            this.obj.a = 2; // 错误的做法
+        }
+        updateObj2() {
+            this.obj = {...this.obj, a: 2}; // 正确的做法
+        }
+    }
+    export default DemoModel;
+    ```
+4. 使用属性前，必须先在类中先声明， 否则动态添加的属性不生效
+    ```js
+    @service(module.id)
+    class DemoModel extends Model {
+        setA() {
+            this.a = 111;  // 此处修改不会反馈到页面中
+        }   
+    }
+    export default DemoModel;
+    ```
 
 
 ## 高级用法
@@ -198,87 +198,87 @@ export default () => {
 > 模块之间可以相互依赖， 框架会根据配置类型自动注入进来。举个例子，还是在上面的案例中， HomeModel 依赖另外
 > 一个UserModel, UserModel 中定义了name 属性， HomeModel 初始化后拿到UserModel中的name,并展示在页面中;
 
-1. 定义需要依赖的model
-    ```js UserModel.js
-    import {Model, service} from 'mtor';
-    
-    @service('usermodel')
-    class UserModel extends Model {
-      name = 'hello user';
-    }
-    export default UserModel;
-    ``` 
+####1. 定义需要依赖的model
+ ```js UserModel.js
+ import {Model, service} from 'mtor';
+ 
+ @service('usermodel')
+ class UserModel extends Model {
+   name = 'hello user';
+ }
+ export default UserModel;
+ ``` 
 - 此处定义了UserModel, 里面有name 属性
 
-2. 定义准备依赖的model
-    ```js HomeModel.js
-    import UserModel from './UserModel';
-    @service('home')
-    //@service(module.id) // 也可以直接使用模块标识
-    class HomeModel extends Model {
-        num = 0;
-        username;
-        
-        /**
-         * 声明user类型
-         * @type {UserModel}
-         */
-        @inject(UserModel) 
-        user;
-    
-        async init() {
-            this.num = await ajax();
-            this.username = this.user.name; // 可以在model方法中直接使用
-            // this.user.name = 'sampsonli' // ***不可以***直接修改被注入属性中的值， 应该调用被注入属性中的方法修改其值
-        }
-    
-        add() {
-            this.num ++;
-        }
-    }
-    export default HomeModel;
-    
-    ```
-    - 说明
-    1. @inject(UserModel)，给属性注入UserModel 的实例；
-    2. 注入的实例，类方法中可以获取实例属性， 也可以调用注入实例的方法， 但是不能直接修改实例的属性， 只能通过setData方法或者类方法去设置；
-    3. 如果使用es语法，被注入的属性前面建议加上jsDoc注释，表明属性类型，方便后续使用实例属性和方法；
+####2. 定义准备依赖的model
+ ```js HomeModel.js
+ import UserModel from './UserModel';
+ @service('home')
+ //@service(module.id) // 也可以直接使用模块标识
+ class HomeModel extends Model {
+     num = 0;
+     username;
+     
+     /**
+      * 声明user类型
+      * @type {UserModel}
+      */
+     @inject(UserModel) 
+     user;
+ 
+     async init() {
+         this.num = await ajax();
+         this.username = this.user.name; // 可以在model方法中直接使用
+         // this.user.name = 'sampsonli' // ***不可以***直接修改被注入属性中的值， 应该调用被注入属性中的方法修改其值
+     }
+ 
+     add() {
+         this.num ++;
+     }
+ }
+ export default HomeModel;
+ 
+ ```
+ - 说明
+ 1. @inject(UserModel)，给属性注入UserModel 的实例；
+ 2. 注入的实例，类方法中可以获取实例属性， 也可以调用注入实例的方法， 但是不能直接修改实例的属性， 只能通过setData方法或者类方法去设置；
+ 3. 如果使用es语法，被注入的属性前面建议加上jsDoc注释，表明属性类型，方便后续使用实例属性和方法；
 
 
-3. 最后在页面中展示数据
-    ```jsx
-    import React, {useEffect} from 'react';
-    import {useModel} from 'mtor';
-    import style from './style.less';
-    import HomeModel from '../../models/HomeModel';
-    
-    export default () => {
-        const model = useModel(HomeModel);
-        const {
-            num,username, user,
-        } = model;
-        useEffect(() => {
-            model.init();
-        }, []);
-        return (
-            <div className={style.container}>
-                <div className={style.content}>
-                    <div className={style.addOne} onClick={model.add}>
-                        +1
-                    </div>
-                    <div className={style.txt}>
-                        {num}
-                    </div>
-                    <div className={style.txt}>
-                        {username}-{user.name}
-                    </div>
-                </div>
-            </div>
-        );
-    };
-    ```
-    - 说明
-        1. 也可以直接使用被注入属性中的属性值， 当user数据有更新时，会同步到页面中
+####3. 最后在页面中展示数据
+ ```jsx
+ import React, {useEffect} from 'react';
+ import {useModel} from 'mtor';
+ import style from './style.less';
+ import HomeModel from '../../models/HomeModel';
+ 
+ export default () => {
+     const model = useModel(HomeModel);
+     const {
+         num,username, user,
+     } = model;
+     useEffect(() => {
+         model.init();
+     }, []);
+     return (
+         <div className={style.container}>
+             <div className={style.content}>
+                 <div className={style.addOne} onClick={model.add}>
+                     +1
+                 </div>
+                 <div className={style.txt}>
+                     {num}
+                 </div>
+                 <div className={style.txt}>
+                     {username}-{user.name}
+                 </div>
+             </div>
+         </div>
+     );
+ };
+ ```
+ - 说明
+     1. 也可以直接使用被注入属性中的属性值， 当user数据有更新时，会同步到页面中
 
 ### 2. 初始化方法
 > 有时候会遇到这种场景， 模块加载的时候进行一些初始化操作（注意不是初始化值）， 初始化操作可以定义created方法来实现
@@ -301,7 +301,8 @@ export default CreatedModel;
 ```
 - 最佳实践， 尽量减少created方法使用， 在模块类中定义init方法，然后放入组件的 React.useEffect方法中调用。
 
-### 3. 便捷地操作model中的数据
+### 3. setData 妙用
+#### 1. 便捷地操作model中的数据
 > 有时候页面中需要修改model中的数据， 如果只是修改少量数据，新定义一个方法会大大增加业务代码量， 可以使用 model.setData(params)方法
 > params是一个普通对象， key是要修改的属性名， value是修改后的值。
 ```jsx
@@ -332,6 +333,22 @@ export default () => {
 ```
 - 用 model.setData({num: num + 1}) 取代 model.add 方法， 可以减少代码量， 但是缺点是每次页面渲染都会生成一个新方法， 可能对性能优化不是很友好， 具体取舍看业务场景吧！
   setData 所设置的属性名尽量是模块类中存在的属性， 比如上例 setData({num2: 33}) 设置一个新属性num2, 虽然运行没问题， 但是不提倡这样写。
+####2. 给model动态添加新属性
+```js
+@service(module.id)
+class SetDataModel extends Model {
+    num = 0;
+    addNum2() {
+       this.num2 = 100; // 此方法不会在页面中获取num2
+       this.setData({num3: 200}); // 可以在页面中获取num3
+    }
+}
+export default SetDataModel;
+
+```
+-说明
+1. 正常情况下， 属性应该先声明再使用，尽量减少添加没有在类中声明的属性
+2. 也可以在页面中调用setData 动态添加属性
 
 ### 4. 重置model中的所有数据到初始值
 > 组件销毁的时候， 我们要清空现有的数据， 我们可以调用 model.reset；
@@ -362,11 +379,26 @@ export default () => {
     );
 };
 ```
+-说明
+1. 可以用 useInitModel 简化以上逻辑。
 
 ## 从1.0 迁移到2.0
 > 只需要把 generator方法改为 async / await 即可
+>
+> 
 
-
+## 存在的不足
+#### 1. 由于页面数据更新是基于异步的， 如果实现可控组件，对中文输入法在部分浏览器存在兼容性问题， 可以使用setData,解决方案如下:
+~~~jsx
+export default () => {
+    const model = useModel(DemoModel);
+    const {name, name1} = model;
+   return <div>
+      <Input value={name} onChange={({target: {value}}) => model.setData({name: value})}/>
+      <Input value={name1} onChange={({target: {value}}) => model.setName1(value)}/> {/* 这种写法会存在兼容性问题*/}
+   </div>
+}
+~~~
 ## 最佳实践
 mtor 使用最佳实践参考 [最佳实践](https://github.com/sampsonli/mtor/blob/main/doc/最佳实践.md)
 ### 1. 应用场景
