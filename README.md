@@ -39,15 +39,14 @@ mobx也是基于响应式数据流， 在写法，底层实现和MobX有十分�
 总的来说， 在数据层面上，更适合基于面向对象开发，展示层面用方法组件而不是类组件， 再配合react hooks新特性，二者可以完美融合。
 我们可以把页面展示和数据流处理剥离开来， 甚至前端开发可以进一步拆分： “静态页面” 与 “数据处理” 两大块。
 一套数据流处理可以同时应用到多场合，比如pc/h5/小程序/react-native。
-此外， 完美支持typescript，更方便提供api文档
+此外， 完美支持typescript，更友好提供类型支持
 ### 依赖注入
 mtor 基本理念参考了后端java 中spring框架， DI（依赖注入）核心思想。 所有model都是单实例的，统一由框架创建与维护， 模块之间可以相互依赖，
 由mtor自动注入，用户只需通过注解标注类型即可，这样模块之间数据/逻辑共享就变得特别简单。
 
-
 ### 异步操作
-异步操作在开发过程中特别常见，mtor对异步方法做了对开发体验做了大量优化， 不像mbox等库异步完一定要在runInAction 回调中处理
-而且当遇到多个顺序异步操作， 假如异步操作之间有数据修改的情况下可以把修改的数据实时反馈到页面中，而不需要做额外的操作，可以与面向对象思想完美相结合。
+异步操作在开发过程中特别常见，mtor对异步方法做了大量开发体验优化， 不像mobx等库异步处理完一定要在runInAction 中设置数据
+而且当遇到多个顺序异步操作， 假如两个异步操作之间有数据修改的情况下可以把修改的数据实时反馈到页面中，而不需要做额外的操作，可以与面向对象思想完美相结合。
 
 ### 其他
 1. 通用性，兼容性强， 完美支持taro， react-native 等使用react 场景；
@@ -55,7 +54,7 @@ mtor 基本理念参考了后端java 中spring框架， DI（依赖注入）核�
 3. 完美的开发体验，热更新数据不丢失， 包括类属性和静态属性；
 
 ## 2.0 对比1.0 有哪些改进
-1. 不用写繁琐的 generator 方法， 使用async/await, 更通用，更主流；
+1. 使用async/await,取代generator方法， 更通用，更主流；
 2. 对typescript 支持更友好， 实现100%完美支持；
 3. 底层做了大量优化， 性能更高效；
 4. 普通异步操作可以直接通过this修改数据， 不需要再次封装promise；
@@ -96,15 +95,15 @@ export default HomeModel;
 ~~~
 -说明
 1. @service('home') 定义一个模块， 每个模块必须添加此注解， 其中home 是自己给模块取的名称, 如果不想取名，也可直接用module.id， 比如@service(module.id);
-2. mtor 大量依赖最新注解语法， 需要配置相应babel插件(@babel/plugin-proposal-decorators)；
+2. mtor 大量依赖最新注解语法， 需要配置相应babel插件(@babel/plugin-proposal-decorators);
 3. Model 是个类接口， 主要是给model实例和类提供接口api和属性;
-4. init() 是一个异步方法；
-5. add() 是定义的普通类方法， 此方法给类属性num 加1；
-6. num 是一个类属性， 页面中可以之间使用；
+4. init() 是一个异步方法, 调用接口返回给num属性;
+5. add() 是定义的普通类方法， 此方法给类属性num 加1;
+6. num 是一个类属性， 页面中可以直接使用;
 
 
 ### 2. 在页面中使用 model (useModel)
-> 页面引入model目前仅支持方法组件，使用方法如下：
+> 页面引入model目前仅支持方法组件（使用hooks语法），使用方法如下：
 ```jsx
 import React, {useEffect} from 'react';
 import {useModel} from 'mtor';
@@ -135,12 +134,12 @@ export default () => {
 
 ```
 - 说明
-1. model 中包含模块中定义的属性和方法；
-2. 获取model 实例通过 useModel方法 ,传入Model类即可；
-3. model中所有方法已经绑定过this了， 可以单独拿出来直接使用；
+1. model 是HomeModel的一个实力， 通过useModel 方法获取， 传一个类型类；
+2. 页面加载后调用model中定义的init方法，获取随机数；
+3. **（小技巧）** model中所有方法已经绑定过this了， 可以单独拿出来直接使用；
 
 ### 3. 在页面中使用 model (useModel 二次封装版 useInitModel)
-
+> 在上面案例中使用useModel写法 每次页面加载都会重新执行init方法， 如果开发情况下， 修改了页面， 会导致页面热跟新，其实并不需要再次执行init方法， 可以用useInitModel 取代 useModel， 方法如下： 
 ```jsx
 import React, {useEffect} from 'react';
 import {useModel} from 'mtor';
@@ -174,7 +173,7 @@ export default () => {
 3. useInitModel开发模式做了优化， 页面热更新的时候不会再次调用reset 与初始化方法；
 
 
-# 三、深入理解mtor
+# 三、深入理解 mtor
 ### 1. 依赖注入（DI)
 > 以上案例基本上可以满足绝大部分业务需求, 但是有时候我们定义了多个model， model之间需要有数据共享， 在mtor 引入了依赖注入（Dependency Inject),
 > 模块之间可以相互依赖， 框架会根据配置类型自动注入进来。举个例子，还是在上面的案例中， HomeModel 依赖另外
@@ -195,8 +194,8 @@ export default () => {
 #### 2. 定义准备依赖的model
  ```js HomeModel.js
  import UserModel from './UserModel';
- @service('home')
- //@service(module.id) // 也可以直接使用模块标识
+
+ @service(module.id) // 也可以直接使用模块标识
  class HomeModel extends Model {
      num = 0;
      username;
@@ -210,8 +209,9 @@ export default () => {
  
      async init() {
          this.num = await ajax();
-         this.username = this.user.name; // 可以在model方法中直接使用
+         this.username = this.user.name; // 可以在model方法中直接使用UserModel 中name 属性
          // this.user.name = 'sampsonli' // ***不可以***直接修改被注入属性中的值， 应该调用被注入属性中的方法修改其值
+         // this.user.setData({name: 'sampsonli'} // 可以调用UserModel 中setData 为name 赋值
      }
  
      add() {
@@ -223,7 +223,7 @@ export default () => {
  ```
  - 说明
  1. @inject(UserModel)，给属性注入UserModel 的实例；
- 2. 注入的实例，类方法中可以获取实例属性， 也可以调用注入实例的方法， 但是不能直接修改实例的属性， 只能通过setData方法或者类方法去设置；
+ 2. 注入的实例，类方法中可以获取实例属性， 也可以调用注入实例的方法， 但是不能直接修改实例的属性， 只能通过setData方法或者UserModel 中单独定义方法去设置；
  3. 如果使用es语法，被注入的属性前面建议加上jsDoc注释，表明属性类型，方便后续使用实例属性和方法；
 
 
@@ -400,7 +400,7 @@ export default () => {
 >
 > 
 
-# 五、存在的问题
+# 五、已知存在的问题
 #### 1. 由于页面数据更新是基于异步的， 如果实现可控组件，对中文输入法在部分浏览器存在兼容性问题， 可以使用setData,解决方案如下:
 ~~~jsx
 export default () => {
@@ -408,7 +408,7 @@ export default () => {
     const {name, name1} = model;
    return <div>
       <Input value={name} onChange={({target: {value}}) => model.setData({name: value})}/>
-      <Input value={name1} onChange={({target: {value}}) => model.setName1(value)}/> {/* 这种写法会存在兼容性问题*/}
+      <Input value={name1} onChange={({target: {value}}) => model.setName1(value)}/> {/* 在DemoModel 定义了setName1 这个方法情况下， 这种写法会存在兼容性问题*/}
    </div>
 }
 ~~~
