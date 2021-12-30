@@ -34,7 +34,7 @@ export function service(ns: string) {
         delete Clazz.prototype.__wired;
 
         // 给外面用的原型实例
-        const prototype = {setData: undefined, reset: undefined, created: undefined, __origin: instance};
+        const prototype = {setData: undefined, reset: undefined, onCreated: undefined, __origin: instance, onBeforeClean: undefined};
 
         // 是否正在同步标志位
         let isSyncing = false;
@@ -92,6 +92,9 @@ export function service(ns: string) {
          * 重置模块数据到初始状态， 一般用于组件销毁的时候调用
          */
         prototype.reset = function () {
+            if (typeof prototype.onBeforeClean === 'function') { // 清空数据前钩子函数
+                prototype.onBeforeClean();
+            }
             const newObj = Object.create(allProto[ns]);
             const origin = allProto[ns].__origin;
             Object.getOwnPropertyNames(origin).forEach(key => {
@@ -152,9 +155,9 @@ export function service(ns: string) {
 
         allProto[ns] = prototype;
         // 初始化提供created 方法调用, 热更新不重复调用
-        if (typeof prototype.created === 'function' && !isHotReload) {
+        if (typeof prototype.onCreated === 'function' && !isHotReload) {
             // @ts-ignore
-            prototype.created();
+            prototype.onCreated();
         }
         Clazz.ns = ns;
         // assign(Clazz.prototype, prototype); // 覆盖初始原型对象
