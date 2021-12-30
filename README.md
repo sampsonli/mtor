@@ -297,7 +297,10 @@ class CreatedModel extends Model {
 }
 export default CreatedModel;
 ```
-- 最佳实践， 尽量减少created方法使用， 在模块类中定义init方法，然后放入组件的 React.useEffect方法中调用。
+- 最佳实践， 尽量减少onCreated方法使用， 在模块类中定义init方法，然后放入组件的 React.useEffect方法中调用。
+
+### 4. 模块生命周期方法
+> 目前只提供了onCreated, onBeforeClean 钩子方法， onCreated 前面已经介绍过了， onBeforeClean 在调用 reset方法前自动调用， 可以用来进行一些数据清理工作， 比如取消事件注册，定时器任务等等。
 
 ### 4. setData 妙用
 #### 1. 便捷地操作model中的数据
