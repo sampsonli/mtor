@@ -252,7 +252,7 @@ const tempObj = {};
  *
  * @param clean - 是否在页面销毁的时候调用reset方法, 默认true
  */
-export const useInitModel = <T extends Model>(Clazz: { new(): T, ns: string }, initFn: (args: T) => any = () => null, clean: boolean = true): T => {
+export const useInitModel = <T extends Model>(Clazz: { new(): T, ns: string }, initFn: (model?: T) => any = () => null, clean: boolean = true): T => {
     const model = useModel(Clazz);
     useEffect(() => {
         if (tempObj[Clazz.ns]) {
