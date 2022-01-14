@@ -4,8 +4,9 @@ declare class EventBus {
      * 注册事件
      * @param type - 事件名称
      * @param listener - 事件回调函数
+     * @returns  取消当前事件回调方法
      */
-    on(type: any, listener: any): void;
+    on(type: any, listener: any): () => void;
     /**
      * 取消注册的事件
      * @param type - 事件名称
