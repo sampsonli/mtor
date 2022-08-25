@@ -55,9 +55,23 @@ export function service(ns: string) {
         }
         Object.getOwnPropertyNames(Clazz.prototype).forEach(key => {
             if (key !== 'constructor' && typeof Clazz.prototype[key] === 'function') {
-                const origin = Clazz.prototype[key];
+                const evtName = `${FLAG_PREFIX}${ns}-function-${key}`;
+                eventBus.clean(evtName);
+                eventBus.on(evtName, ({params, cb}) => {
+                    const origin = Clazz.prototype[key];
+                    const result = origin.bind(toBeSyncState)(...params);
+                    cb(result);
+                });
+
                 prototype[key] = function (...params) {
-                    return origin.bind(toBeSyncState)(...params)
+                    let result;
+                    eventBus.emit(evtName, {
+                        params,
+                        cb: (ret) => {
+                            result = ret
+                        }
+                    });
+                    return result;
                 };
             }
         });
