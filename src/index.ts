@@ -63,7 +63,7 @@ export function service(ns: string) {
                     cb(result);
                 });
 
-                prototype[key] = allProto?.[ns]?.[key] || function (...params) {
+                prototype[key] = allProto[ns]?.[key] || function (...params) {
                     let result;
                     eventBus.emit(evtName, {
                         params,
@@ -73,23 +73,6 @@ export function service(ns: string) {
                     });
                     return result;
                 };
-
-                // if(allProto[ns] && allProto[ns][key]) { // 如果是热更新， 方法引用不需要更新
-                //     prototype[key] = allProto[ns][key];
-                // } else {
-                //     prototype[key] = function (...params) {
-                //         let result;
-                //         eventBus.emit(evtName, {
-                //             params,
-                //             cb: (ret) => {
-                //                 result = ret
-                //             }
-                //         });
-                //         return result;
-                //     };
-                // }
-
-                
             }
         });
 
