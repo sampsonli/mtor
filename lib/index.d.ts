@@ -1,4 +1,13 @@
+/// <reference types="node" />
 export { eventBus as evtBus } from './EventBus';
+/**
+ * 定义模块
+ * @param {string} md -- 模块（必须包含id属性）
+ */
+export declare function define(md: NodeModule): <T extends Model, K extends {
+    new (): T;
+    ns: string;
+}>(Clazz: K) => K;
 /**
  * 创建模块
  * @param {string} ns -- 模块名称， 模块名称唯一， 不能有冲突
@@ -64,4 +73,4 @@ export declare const getModels: () => {};
 export declare const useInitModel: <T extends Model>(Clazz: {
     new (): T;
     ns: string;
-}, initFn?: (model?: T) => any, clean?: boolean) => T;
+}, initFn?: (model: T) => any, clean?: boolean) => T;

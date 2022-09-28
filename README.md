@@ -18,17 +18,17 @@ mtor 是一个基于react 类响应式数据流状态管理库， 本身是基�
 总结 mtor 具有以下四大特点:
 1. 面向对象
 2. 依赖注入
-3. 异步处理
+3. 异步操作
 
 ### 面向对象
-把一个功能点中所有方法， 数据封装成一个模块类，由mtor自动初始化并管理类实例；
+把一个功能模块中所有方法和属性， 数据封装成一个模型类，由mtor自动初始化并管理类其实例；
 mtor开发的基本理念， 在数据层面上，更适合基于面向对象开发，展示层面用方法组件而不是类组件， 再配合react hooks新特性，二者可以完美融合。
 我们可以把页面展示和数据流处理剥离开来， 甚至前端开发可以进一步拆分： “静态页面” 与 “数据处理” 两大块。
 一套数据流处理可以同时应用到多场合，比如pc/h5/小程序/react-native。
 此外， 完美支持typescript，提供更友好提供类型支持。
 
 ### 依赖注入
-mtor 核心思想参考了后端java 中spring框架， DI（依赖注入）概念。 所有模块类都是单实例的，统一由框架创建与维护， 模块之间可以相互依赖，
+mtor 核心思想参考了后端java 中spring框架， DI（依赖注入）概念。 所有模块类都是单实例的，统一由框架创建并维护， 模块之间可以相互依赖，
 由mtor自动注入，用户只需通过注解（@inject）标注类型即可，这样模块实例之间数据/逻辑共享就变得特别简单。
 
 ### 异步操作
@@ -263,7 +263,7 @@ export default () => {
     ```
 
 ### 3. 初始化方法
-> 有时候会遇到这种场景， 模块加载的时候进行一些初始化操作（注意不是初始化值）， 初始化操作可以定义onCreated方法来实现
+> 有时候会遇到这种场景， 模块加载的时候需要进行一些初始化操作（注意不是初始化值）， 初始化操作可以定义onCreated方法来实现
 ```js
 @service(module.id)
 class CreatedModel extends Model {
@@ -281,7 +281,7 @@ class CreatedModel extends Model {
 }
 export default CreatedModel;
 ```
-- 最佳实践， 尽量减少onCreated方法使用， 在模块类中定义init方法，然后放入组件的 React.useEffect方法中调用。
+- 最佳实践， 尽量减少onCreated方法使用， 在模块类中定义init方法，然后放入方法组件的 React.useEffect方法中调用。
 
 ### 4. 模块生命周期方法
 > 目前只提供了onCreated, onBeforeClean 钩子方法， onCreated 前面已经介绍过了， onBeforeClean 在调用 reset方法前自动调用， 可以用来进行一些数据清理工作， 比如取消事件注册，定时器任务等等。
@@ -318,7 +318,8 @@ export default () => {
 ```
 - 用 model.setData({num: num + 1}) 取代 model.add 方法， 可以减少代码量， 但是缺点是每次页面渲染都会生成一个新方法， 可能对性能优化不是很友好， 具体取舍看业务场景吧！
   setData 所设置的属性名尽量是模块类中存在的属性， 比如上例 setData({num2: 33}) 设置一个新属性num2, 虽然运行没问题， 但是不提倡这样写。
-####2. 给model动态添加新属性
+
+#### 2. 给model动态添加新属性
 ```js
 @service(module.id)
 class SetDataModel extends Model {
@@ -365,10 +366,10 @@ export default () => {
 };
 ```
 -说明
-1. 可以用 useInitModel 简化以上逻辑。
+1. 可以用 useInitModel 简化以上逻辑。useInitModel 方法还可以避免开发过程中热更新对init方法重复调用， 大大提高开发体验
 
 # 四、从1.0 迁移到2.0
-> 只需要把 generator方法改为 async / await 即可
+> 只需要把 generator方法改为 async / await 即可。
 >
 > 
 
@@ -380,7 +381,7 @@ export default () => {
     const {name, name1} = model;
    return <div>
       <Input value={name} onChange={({target: {value}}) => model.setData({name: value})}/>
-      <Input value={name1} onChange={({target: {value}}) => model.setName1(value)}/> {/* 在DemoModel 定义了setName1 这个方法情况下， 这种写法会存在兼容性问题*/}
+      <Input value={name1} onChange={({target: {value}}) => model.setName1(value)}/> {/* 在DemoModel 定义了setName1 这个方法情况下， 这种写法部分浏览器下会存在兼容性问题*/}
    </div>
 }
 ~~~
@@ -390,8 +391,8 @@ mtor 使用最佳实践参考 [最佳实践](https://github.com/sampsonli/mtor/b
 > mtor 非常适用于具有复杂交互逻辑的页面/组件， 或者页面之间有数据依赖/共享等场景；
 > 不适用于循环列表项中的复杂组件。
 ### 2. ui展示层与数据分离
-> 页面展示和数据可以进一步拆分， 页面中不包含任何逻辑处理， 数据层完全基于model；
-> 以面向对象的方式进行开发， 对外提供api接口和数据文档，并且一份model可以适配多平台，比如同时适配移动端h5 和pc端页面，
+> 页面展示和数据可以进一步拆分， 页面中不包含任何逻辑处理， 数据层完全基于mtor中Model；
+> 以面向对象的方式进行开发， 对外提供api接口和数据文档，并且一份Model可以同时适配多平台，比如同时适配移动端h5 和pc端页面，
 > 多人协作的时候， 可以把 ui设计 和 数据逻辑处理 完全交给不同人负责，高效完成需求， 同时可以保证代码风格统一。
 
 ### 3. 开发环境开启热更新
@@ -412,6 +413,6 @@ npm run build
 # 八、一起维护
 欢迎大家pull request 贡献自己的代码、提取宝贵意见。
 # 九、参考模板项目
-一个整合最新react17+webpack5通用模板项目[react_template_project](https://github.com/sampsonli/react_template_project)
+一个整合最新react+webpack5通用模板项目[react_template_project](https://github.com/sampsonli/react_template_project)
 此项目本人会不断维护更新，以最佳实践去使用 mtor。 大家也可以贡献自己的代码到这个项目中。
 
