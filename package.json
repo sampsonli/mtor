@@ -1,6 +1,6 @@
 {
   "name": "mtor",
-  "version": "2.1.5",
+  "version": "2.1.6",
   "description": "react 模块化 依赖注入 数据流处理",
   "author": "sampsonli",
   "keywords": [
@@ -26,12 +26,12 @@
     "lib"
   ],
   "peerDependencies": {
-    "react": ">=0.14.0"
+    "react": ">=15.5.0"
   },
   "devDependencies": {
     "@types/jest": "^26.0.15",
     "jest": "^26.6.3",
-    "react": ">=0.14.0",
+    "react": ">=15.5.0",
     "ts-jest": "^26.4.4",
     "typescript": "^3.9.7"
   }

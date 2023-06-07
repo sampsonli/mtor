@@ -86,9 +86,9 @@
          });
  
          prototype.setData = function (props: Object) {
-             const toBeAdd = Object.keys(props).filter((key) => !Object.getOwnPropertyDescriptor(_toBeSyncState, key));
-             if(toBeAdd.length) { // 注册新属性
-                 toBeAdd.forEach(key => {
+             let needUpdate = false;
+             Object.keys(props).forEach((key) => {
+                 if (!Object.getOwnPropertyDescriptor(_toBeSyncState, key)) {
                      Object.defineProperty(toBeSyncState, key, {
                          set: (value) => {
                              if (value !== toBeSyncState[key]) {
@@ -97,10 +97,13 @@
                              }
                          },
                          get: () => _toBeSyncState[key],
-                     })
-                 });
-             }
-             if(Object.keys(props).some(key => props[key] !== _toBeSyncState[key])) { // 判断有没有修改
+                     });
+                     needUpdate = true;
+                 } else if (!needUpdate && props[key] !== _toBeSyncState[key]) {
+                     needUpdate = true;
+                 }
+             });
+             if (needUpdate) { // 判断有没有修改
                  // 重新实例化对象， 同步设置
                  const newObj = Object.create(allProto[ns]);
                  assign(_toBeSyncState, props);
@@ -179,7 +182,6 @@
          allProto[ns] = prototype;
          // 初始化提供created 方法调用, 热更新不重复调用
          if (typeof prototype.onCreated === 'function' && !isHotReload) {
-             // @ts-ignore
              prototype.onCreated();
          }
          Clazz.ns = ns;
