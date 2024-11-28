@@ -1,14 +1,13 @@
 /// <reference types="node" />
 export { eventBus as evtBus } from './EventBus';
 /**
- * 定义模块
+ * 基于webpack打包构建中定义模块
  * @param {string} md -- 模块（必须包含id属性）
  */
 export declare function define(md: NodeModule): <T extends Model, K extends {
     new (): T;
     ns: string;
 }>(Clazz: K) => K;
-export declare function enableHot(hot: any): void;
 /**
  * 创建模块
  * @param {string} ns -- 模块名称， 模块名称唯一， 不能有冲突

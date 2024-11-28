@@ -21,7 +21,7 @@
  const allEvents = {};
  
  /**
-  * 定义模块
+  * 基于webpack打包构建中定义模块
   * @param {string} md -- 模块（必须包含id属性）
   */
  export function define(md: NodeModule) {
@@ -31,13 +31,6 @@
  }
 
 
- export function enableHot(hot: any) {
-     if(hot.accept) {
-         hot.accept((a) => {
-             service(a.default.ns)(a.default);
-         });
-     }
- }
  /**
   * 创建模块
   * @param {string} ns -- 模块名称， 模块名称唯一， 不能有冲突
