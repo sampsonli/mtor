@@ -29,7 +29,15 @@
      md.hot?.accept();
      return service(md.id);
  }
- 
+
+
+ export function enableHot(hot: any) {
+     if(hot.accept) {
+         hot.accept((a) => {
+             service(a.default.ns)(a.default);
+         });
+     }
+ }
  /**
   * 创建模块
   * @param {string} ns -- 模块名称， 模块名称唯一， 不能有冲突

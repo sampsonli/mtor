@@ -8,6 +8,7 @@ export declare function define(md: NodeModule): <T extends Model, K extends {
     new (): T;
     ns: string;
 }>(Clazz: K) => K;
+export declare function enableHot(hot: any): void;
 /**
  * 创建模块
  * @param {string} ns -- 模块名称， 模块名称唯一， 不能有冲突
