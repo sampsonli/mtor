@@ -6,20 +6,21 @@
  import {useState, useEffect} from 'react';
  import {assign} from "./util";
  import {eventBus} from './EventBus';
- 
+
+
  export {eventBus as evtBus} from './EventBus';
  // 保存所有模块的原型
  const allProto = {};
  // 保存所有模块的static属性, 方便开发模式热更新静态数据保留
  const allStatic = {};
- 
+
  let allState = {};
- 
+
  const FLAG_PREFIX = 'mtor/';
- 
+
  // 用于保存所有模块依赖注入注册的事件， 防止热更新的时候内存泄露
  const allEvents = {};
- 
+
  /**
   * 基于webpack打包构建中定义模块
   * @param {string} md -- 模块（必须包含id属性）
@@ -42,10 +43,10 @@
          const __wired = Clazz.prototype.__wired || {};
          const wiredList = Object.keys(__wired);
          delete Clazz.prototype.__wired;
- 
+
          // 给外面用的原型实例
-         const prototype = {setData: undefined, reset: undefined, onCreated: undefined, __origin: instance, onBeforeClean: undefined};
- 
+         const prototype = {setData: undefined, reset: undefined, onCreated: undefined, __origin: instance, onBeforeClean: undefined, onBeforeReset: undefined};
+
          // 是否正在同步标志位
          let isSyncing = false;
          let toBeSyncState; // 内部this, 对this 的如何修改都会同步到_toBeSyncState中
@@ -72,7 +73,7 @@
                      const result = origin.bind(toBeSyncState)(...params);
                      cb(result);
                  });
- 
+
                  prototype[key] = allProto[ns]?.[key] || function (...params) {
                      let result;
                      eventBus.emit(evtName, {
@@ -85,7 +86,7 @@
                  };
              }
          });
- 
+
          prototype.setData = function (props: Object) {
              let needUpdate = false;
              Object.keys(props).forEach((key) => {
@@ -114,7 +115,7 @@
              }
          };
          const initState = Object.create(prototype);
- 
+
          /**
           * 重置模块数据到初始状态， 一般用于组件销毁的时候调用
           */
@@ -122,6 +123,7 @@
              if (typeof prototype.onBeforeClean === 'function') { // 清空数据前钩子函数
                  prototype.onBeforeClean();
              }
+             eventBus.emit(`${FLAG_PREFIX}${ns}-reset`);
              const newObj = Object.create(allProto[ns]);
              const origin = allProto[ns].__origin;
              Object.getOwnPropertyNames(origin).forEach(key => {
@@ -134,6 +136,11 @@
              allState[ns] = newObj;
              eventBus.emit(TYPE, newObj);
          };
+         prototype.onBeforeReset = function (cb: Function) {
+             if(cb) {
+                 eventBus.once(`${FLAG_PREFIX}${ns}-reset`, cb);
+             }
+         }
          const finalInstance = allState[ns] || instance;
          Object.getOwnPropertyNames(instance).forEach(key => {
              initState[key] = finalInstance[key];
@@ -141,7 +148,7 @@
          wiredList.forEach(key => {
              initState[key] = allState[__wired[key]];
          });
- 
+
          allEvents[ns] = allEvents[ns] || {};
          const events = allEvents[ns];
          wiredList.forEach((key) => {
@@ -152,7 +159,7 @@
              }
              eventBus.on(eventName, events[eventName]);
          });
- 
+
          const initSyncState = (state = allState[ns]) => {
              toBeSyncState = Object.create(prototype);
              _toBeSyncState = {...state};
@@ -179,7 +186,7 @@
              initSyncState(initState);
              allStatic[ns] = assign({}, Clazz);
          }
- 
+
          allProto[ns] = prototype;
          // 初始化提供created 方法调用, 热更新不重复调用
          if (typeof prototype.onCreated === 'function' && !isHotReload) {
@@ -190,7 +197,7 @@
          return Clazz;
      };
  }
- 
+
  /**
   * react hooks 方式获取模块类实例
   * @param Class 模块类
@@ -205,7 +212,7 @@
      }, []);
      return data;
  };
- 
+
  /**
   * 按照类型自动注入Model实例
   * @param {Model} Class --模块类
@@ -219,7 +226,7 @@
          clazz.__wired[attr] = ns;
      };
  }
- 
+
  /**
   * 按照模块名自动注入Model实例
   * @param {string} ns --模块名称
@@ -232,14 +239,13 @@
          clazz.__wired[attr] = ns;
      };
  }
- 
- 
+
+
  /**
   * 模块基类，每个模块都应继承该基础模块类
   */
  export class Model {
      static ns = '';
- 
      /**
       * 批量设置模块数据
       * @param {Object} data - key-value 对象
@@ -247,23 +253,27 @@
      setData<T>(this: T, data: { [p in { [c in keyof T]: T[c] extends Function ? never : c }[keyof T]]?: T[p] }) {
          return;
      }
- 
+
      /**
       * 重置模块数据到初始默认值
       */
      reset() {
          return;
      }
+
+     protected onBeforeReset(cb: Function) {
+
+     }
  }
- 
+
  /**
   * 获取所有模型实例
   */
  export const getModels = () => {
      return allState;
  }
- 
- 
+
+
  /**
   *  用于保存页面销毁前定时器清除方法回调
   */
@@ -297,4 +307,3 @@
      }, []);
      return model;
  }
- 

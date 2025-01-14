@@ -235,7 +235,7 @@ export default () => {
 
 ### 2. 定义model注意事项
 1. 不管是普通方法，还是异步方法， 尽量不要定义为箭头方法， 箭头方法在类中是以普通属性存在， 不能使用类中定义的属性；
-2. 保留字 setData, reset, ns,不能用于自定义方法、属性名； 自定义onCreated, onBeforeClean 会根据满足某些条件自动调用；
+2. 保留字 setData, reset, ns,不能用于自定义方法、属性名； 自定义onCreated 会根据满足某些条件自动调用；
 3. 当修改模块中对象类型的属性时， 需要同时更新对象引用值。例如：
     ```js
     @service(module.id)
@@ -284,7 +284,7 @@ export default CreatedModel;
 - 最佳实践， 尽量减少onCreated方法使用， 在模块类中定义init方法，然后放入方法组件的 React.useEffect方法中调用。
 
 ### 4. 模块生命周期方法
-> 目前只提供了onCreated, onBeforeClean 钩子方法， onCreated 前面已经介绍过了， onBeforeClean 在调用 reset方法前自动调用， 可以用来进行一些数据清理工作， 比如取消事件注册，定时器任务等等。
+> 目前只提供了onCreated 钩子方法， onCreated 前面已经介绍过了， 在调用 reset方法前自动调用， 可以用来进行一些数据清理工作， 比如取消事件注册，定时器任务等等。
 
 ### 4. setData 妙用
 #### 1. 便捷地操作model中的数据

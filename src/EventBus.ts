@@ -44,7 +44,7 @@ class EventBus {
      * @param event - 事件名称
      * @param param - 传递注册事件回调函数的参数
      */
-    emit(event, param) {
+    emit(event, param = undefined) {
         if (this.cbs[event]) {
             const todelete = [];
             this.cbs[event].forEach(cb => {
