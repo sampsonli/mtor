@@ -40,7 +40,19 @@
      return function <T extends Model, K extends { new(): T, ns: string }>(Clazz: K): K {
          const TYPE = `${FLAG_PREFIX}${ns}`;
          const instance = new Clazz();
-         const __wired = Clazz.prototype.__wired || {};
+         let __wired = Clazz.prototype.__wired;
+         if(!__wired) {
+             __wired = {};
+             const tmp = Object.getOwnPropertyDescriptors(instance);
+             Object.keys(tmp).forEach((key) => {
+                 if(typeof tmp[key].value === "string") {
+                     const _ns = tmp[key].value.split('xxx$$$~~~')[1];
+                     if(_ns) {
+                         __wired[key] = _ns;
+                     }
+                 }
+             });
+         }
          const wiredList = Object.keys(__wired);
          delete Clazz.prototype.__wired;
 
@@ -220,6 +232,7 @@
  export function inject<T extends Model>(Class: { new(): T, ns: string }) {
      const ns = Class.ns;
      return (clazz, attr) => {
+         if(!clazz) return () => `xxx$$$~~~${ns}`
          if (!clazz.__wired) {
              clazz.__wired = {};
          }
