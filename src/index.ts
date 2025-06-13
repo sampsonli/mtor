@@ -76,7 +76,11 @@
              });
              isSyncing = true;
          }
-         Object.getOwnPropertyNames(Clazz.prototype).forEach(key => {
+         let propNames = Object.getOwnPropertyNames(Clazz.prototype);
+         if(Object.getPrototypeOf(Clazz.prototype) !== Model.prototype) {
+             propNames = [...Object.getOwnPropertyNames(Object.getPrototypeOf(Clazz.prototype)), ...propNames];
+         }
+         propNames.forEach(key => {
              if (key !== 'constructor' && typeof Clazz.prototype[key] === 'function') {
                  const evtName = `${FLAG_PREFIX}${ns}-function-${key}`;
                  eventBus.clean(evtName);
