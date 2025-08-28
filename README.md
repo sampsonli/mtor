@@ -1,64 +1,64 @@
-# 一、mtor 是什么？
+# MTOR 使用文档
 
-[comment]: <> ([![Build Status]&#40;https://travis-ci.org/sampsonli/mtor.svg?branch=master&#41;]&#40;https://travis-ci.org/sampsonli/mtor&#41;)
-[![npm version](https://img.shields.io/npm/v/mtor.svg?style=flat)](https://www.npmjs.com/package/mtor)
-[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/sampsonli/mtor/blob/master/LICENSE)
-----
-mtor 是一个基于react 类响应式数据流状态管理库， 本身是基于原生react hooks 进行了二次封装，对比原生react hooks:
+## 目录
+1. [MTOR简介](#1-mtor简介)
+2. [安装](#2-安装)
+3. [基本使用](#3-基本使用)
+4. [核心概念](#4-核心概念)
+5. [高级特性](#5-高级特性)
+6. [API参考](#6-api参考)
+7. [最佳实践](#7-最佳实践)
+8. [常见问题](#8-常见问题)
+9. [版本迁移](#9-版本迁移)
 
-| 问题  | react hooks                             | mtor                                                |
-|-----|-----------------------------------------|-----------------------------------------------------|
-| 属性保存与修改 | 一个useState 只能管理一个属性         | <font color="green">是用setData方法可以同时对多个属性进行修改</font> |
-| 可读性 | 随着组件规模增大，展示与业务逻辑混在一起，可读性直线降低， 也更容易出错 | ui展示与业务了逻辑分离，结构更清晰,<font color="green">可读性更好</font> |
-| 复用性 | 组件里面的业务逻辑不可复用             | 整个模块都是<font color="green">可复用</font>                |
-| 数据共享 | 必须使用useContext，或属性传值，增加大量非业务代码    | 使用依赖注入， 多模块轻松实现<font color="green">共享/内部通信</font>   |
-| 开发体验 | 热更新，所有state丢失，useMemo,useCallback,等依赖项很容易出错 | 热更新数据保留，不用关心依赖项更新问题                                 |
-----
+## 1. MTOR简介
 
-总结 mtor 具有以下四大特点:
-1. 面向对象
-2. 依赖注入
-3. 异步操作
+MTOR是一个基于React的响应式数据流状态管理库，它基于原生React Hooks进行了二次封装，提供了更加简洁、高效的状态管理方案。
 
-### 面向对象
-把一个功能模块中所有方法和属性， 数据封装成一个模型类，由mtor自动初始化并管理类其实例；
-mtor开发的基本理念， 在数据层面上，更适合基于面向对象开发，展示层面用方法组件而不是类组件， 再配合react hooks新特性，二者可以完美融合。
-我们可以把页面展示和数据流处理剥离开来， 甚至前端开发可以进一步拆分： “静态页面” 与 “数据处理” 两大块。
-一套数据流处理可以同时应用到多场合，比如pc/h5/小程序/react-native。
-此外， 完美支持typescript，提供更友好提供类型支持。
+### 1.1 核心特点
 
-### 依赖注入
-mtor 核心思想参考了后端java 中spring框架， DI（依赖注入）概念。 所有模块类都是单实例的，统一由框架创建并维护， 模块之间可以相互依赖，
-由mtor自动注入，用户只需通过注解（@inject）标注类型即可，这样模块实例之间数据/逻辑共享就变得特别简单。
+MTOR具有以下四大特点：
 
-### 异步操作
-异步操作在开发过程中特别常见，mtor对异步方法做了大量开发体验方面的优化， 不像mobx等库异步处理完一定要在runInAction 中完成设置数据。
-假如两个异步操作之间有数据修改的情况下可以把修改的数据实时反馈到页面中，而不需要做额外的操作，可以与面向对象思想完美融合。
+1. **面向对象**：将功能模块中的所有方法、属性和数据封装成一个模型类，由MTOR自动初始化并管理类实例。
+2. **依赖注入**：参考了Java Spring框架的DI（依赖注入）概念，所有模块类都是单实例的，由框架创建并维护，模块之间可以相互依赖。
+3. **异步操作**：对异步方法做了大量开发体验方面的优化，异步操作之间的数据修改可以实时反馈到页面中。
+4. **其他优势**：
+   - 通用性强，兼容Taro、React Native等React生态
+   - 模块跟随页面加载自动注册，无需单独写注入逻辑
+   - 热更新数据不丢失，包括类属性和静态属性
 
-### 其他
-1. 通用性，兼容性强， 完美支持taro， react-native 等使用react 场景；
-2. 模块跟随导入的页面加载而自动注册， 无需单独写注入逻辑；
-3. 完美的开发体验，热更新数据不丢失， 包括类属性和静态属性；
+### 1.2 与React Hooks对比
 
-### 2.0 对比1.0 有哪些改进
-1. 使用async/await,取代generator方法， 更通用，更主流；
-2. 对typescript 支持更友好， 实现100%完美支持；
-3. 底层做了大量优化， 性能更高效；
-4. 普通异步回调操作可以直接通过this修改数据， 不需要再次封装promise或者调用setData进行修改；
+| 问题 | React Hooks | MTOR |
+|-----|-------------|------|
+| 属性保存与修改 | 一个useState只能管理一个属性 | 使用setData方法可以同时对多个属性进行修改 |
+| 可读性 | 随着组件规模增大，展示与业务逻辑混在一起，可读性降低 | UI展示与业务逻辑分离，结构更清晰，可读性更好 |
+| 复用性 | 组件里面的业务逻辑不可复用 | 整个模块都是可复用的 |
+| 数据共享 | 必须使用useContext或属性传值，增加大量非业务代码 | 使用依赖注入，多模块轻松实现共享/内部通信 |
+| 开发体验 | 热更新时所有state丢失，useMemo、useCallback等依赖项容易出错 | 热更新数据保留，不用关心依赖项更新问题 |
 
+## 2. 安装
 
-# 二、开始使用mtor
-## 安装
-```shell script
-yarn add mtor # npm install --save mtor
+```bash
+# 使用npm安装
+npm install --save mtor
+
+# 或使用yarn安装
+yarn add mtor
 ```
-## 从一个简单demo开始
-> 实现一个简单小需求， 从后端接口获取一个随机数，展示在页面中，
-> 页面有一个按钮，点击给获取的随机数+1
 
-### 1. 定义模块类
-~~~js
-import {service, Model} from 'mtor';
+## 3. 基本使用
+
+### 3.1 简单示例
+
+以下是一个简单的示例，实现从后端获取随机数并在页面中展示，点击按钮可以给随机数加1：
+
+#### 3.1.1 定义模块类
+
+```javascript
+// HomeModel.js
+import { service, Model } from 'mtor';
+
 function ajax() { // 模拟ajax请求
     return new Promise((resolve) => {
         setTimeout(() => {
@@ -66,7 +66,8 @@ function ajax() { // 模拟ajax请求
         }, 16.7);
     });
 }
-@service('home')
+
+@service('home') // 或使用 @service(module.id) 或 @define(module)
 class HomeModel extends Model {
     num = 0;
 
@@ -75,344 +76,486 @@ class HomeModel extends Model {
     }
 
     add() { // 普通方法
-        this.num ++;
+        this.num++;
     }
 }
+
 export default HomeModel;
-~~~
--说明
-1. @service('home') 定义一个模块， 每个模块必须添加此注解， 其中home 是自己给模块取的名称, 如果不想取名，也可直接用module.id， 比如@service(module.id);
-2. mtor 大量依赖最新注解语法， 需要配置相应babel插件(@babel/plugin-proposal-decorators);
-3. Model 是个类接口， 主要是给model实例和类提供接口api和属性;
-4. init() 是一个异步方法, 调用接口返回给num属性;
-5. add() 是定义的普通类方法， 此方法给类属性num 加1;
-6. num 是一个类属性， 页面中可以直接使用;
+```
 
+#### 3.1.2 在页面中使用模块
 
-### 2. 在页面中使用 model (useModel)
-> 页面引入model目前仅支持方法组件（使用hooks语法），使用方法如下：
 ```jsx
-import React, {useEffect} from 'react';
-import {useModel} from 'mtor';
-import style from './style.less';
-import HomeModel from '../../models/HomeModel';
+// HomePage.jsx
+import React, { useEffect } from 'react';
+import { useModel } from 'mtor';
+import HomeModel from './HomeModel';
 
 export default () => {
     const model = useModel(HomeModel);
-    const {
-        num,
-    } = model;
+    const { num } = model;
+    
     useEffect(() => {
         model.init();
     }, []);
-    return (
-        <div className={style.container}>
-            <div className={style.content}>
-                <div className={style.addOne} onClick={model.add}>+1</div>
-                <div className={style.txt}>{num}</div>
-            </div>
-        </div>
-    );
-};
-
-```
-- 说明
-1. model 是HomeModel的一个实例， 通过useModel 方法获取， 传一个模块类；
-2. 页面加载后调用model中定义的init方法，获取随机数；
-3. **（小技巧）** model中所有方法已经绑定过this了， 可以单独拿出来直接使用；
-
-### 3. 在页面中使用 model (useModel 二次封装版 useInitModel)
-> 在上面案例中使用useModel写法 每次页面加载都会重新执行init方法， 如果开发情况下， 修改了页面， 会导致页面热跟新，其实并不需要再次执行init方法， 可以用useInitModel 取代 useModel， 方法如下： 
-```jsx
-export default () => {
-    const model = useInitModel(HomeModel, () => model.init(), true);
-    const {
-        num,
-    } = model;
+    
     return (
         <div>
-            {/* // 业务代码   */}
+            <div onClick={model.add}>+1</div>
+            <div>{num}</div>
         </div>
     );
 };
-
 ```
-- 说明
-1. useInitModel 底层基于useModel， useEffect 的二次封装方法;
-2. 第二个参数是第一次加载初始化方法，第三个参数是退出是否调用reset方法；
-3. useInitModel开发模式做了优化， 页面热更新的时候不会再次调用reset 与初始化方法；
 
+#### 3.1.3 使用useInitModel简化代码
 
-# 三、深入理解 mtor
-### 1. 依赖注入（DI)
-> 以上案例基本上可以满足绝大部分业务需求, 但是有时候我们定义了多个模块类， 模块类之间需要有数据共享， 在mtor 引入了依赖注入（Dependency Inject),
-> 模块之间可以相互依赖， 框架会根据配置模块的类型自动注入进来。举个例子，还是在上面的案例中， HomeModel 依赖另外
-> 一个UserModel, UserModel 中定义了name 属性， HomeModel 初始化后拿到UserModel中的name,并展示在页面中;
+```jsx
+// HomePage.jsx
+import React from 'react';
+import { useInitModel } from 'mtor';
+import HomeModel from './HomeModel';
 
-#### 1. 定义需要依赖的model
- ```js UserModel.js
- import {Model, service} from 'mtor';
- 
- @service('usermodel')
- class UserModel extends Model {
-   name = 'hello user';
- }
- export default UserModel;
- ``` 
-- 此处定义了UserModel, 里面有name 属性
-
-#### 2. 定义准备依赖的model
- ```js HomeModel.js
- import UserModel from './UserModel';
-
- @service(module.id) // 也可以直接使用模块标识
- class HomeModel extends Model {
-     num = 0;
-     username;
-     
-     /**
-      * 声明user类型
-      * @type {UserModel}
-      */
-     @inject(UserModel) 
-     user;
- 
-     async init() {
-         this.num = await ajax();
-         this.username = this.user.name; // 可以在model方法中直接使用UserModel 中name 属性
-         // this.user.name = 'sampsonli' // ***不可以***直接修改被注入属性中的值， 应该调用被注入属性中的方法修改其值
-         // this.user.setData({name: 'sampsonli'} // 可以调用UserModel 中setData 为name 赋值
-     }
- 
-     add() {
-         this.num ++;
-     }
- }
- export default HomeModel;
- 
- ```
- - 说明
- 1. @inject(UserModel)，给属性注入UserModel 的实例；
- 2. 注入的实例，类方法中可以获取实例属性， 也可以调用注入实例的方法， 但是不能直接修改实例的属性， 只能通过setData方法或者UserModel 中单独定义方法去设置；
- 3. 如果使用es语法，被注入的属性前面建议加上jsDoc注释，表明属性类型，方便后续使用实例属性和方法；
-
-
-#### 3. 最后在页面中展示数据
- ```jsx
- import React, {useEffect} from 'react';
- import {useModel} from 'mtor';
- import style from './style.less';
- import HomeModel from '../../models/HomeModel';
- 
- export default () => {
-     const model = useModel(HomeModel);
-     const {
-         num,username, user,
-     } = model;
-     useEffect(() => {
-         model.init();
-     }, []);
-     return (
-         <div className={style.container}>
-             <div className={style.content}>
-                 <div className={style.addOne} onClick={model.add}>
-                     +1
-                 </div>
-                 <div className={style.txt}>
-                     {num}
-                 </div>
-                 <div className={style.txt}>
-                     {username}-{user.name}
-                 </div>
-             </div>
-         </div>
-     );
- };
- ```
- - 说明
-     1. 也可以直接使用被注入属性中的属性值， 当user数据有更新时，会同步到页面中。
-
-
-### 2. 定义model注意事项
-1. 不管是普通方法，还是异步方法， 尽量不要定义为箭头方法， 箭头方法在类中是以普通属性存在， 不能使用类中定义的属性；
-2. 保留字 setData, reset, ns,不能用于自定义方法、属性名； 自定义onCreated 会根据满足某些条件自动调用；
-3. 当修改模块中对象类型的属性时， 需要同时更新对象引用值。例如：
-    ```js
-    @service(module.id)
-    class DemoModel extends Model {
-        obj = {a: 1};
+export default () => {
+    const model = useInitModel(HomeModel, (m) => m.init(), true);
+    const { num } = model;
     
-        updateObj() {
-            this.obj.a = 2; // 错误的做法
-        }
-        updateObj2() {
-            this.obj = {...this.obj, a: 2}; // 正确的做法
-        }
-    }
-    export default DemoModel;
-    ```
-4. 使用属性前，必须先在类中声明， 否则动态添加的属性不生效
-    ```js
-    @service(module.id)
-    class DemoModel extends Model {
-        setA() {
-            this.a = 111;  // 此处修改不会反馈到页面中
-        }
-    }
-    export default DemoModel;
-    ```
-
-### 3. 初始化方法
-> 有时候会遇到这种场景， 模块加载的时候需要进行一些初始化操作（注意不是初始化值）， 初始化操作可以定义onCreated方法来实现
-```js
-@service(module.id)
-class CreatedModel extends Model {
-    num = 0;
-    constructor() { // 构造方法只能初始化变量
-        this.num = 1;
-        // this.ajaxGet()// 不能直接调用模块中的方法
-    }
-    ajaxGet() {
-        // 方法逻辑
-    }
-    onCreated() { // 如果定义了onCreated方法，此方法在模块加载的时候会自动执行（注意，热跟新的时候也不会执行哦。。。）
-        thia.ajaxGet() // 此方法中可以调用模块中的方法进行初始化
-    }
-}
-export default CreatedModel;
-```
-- 最佳实践， 尽量减少onCreated方法使用， 在模块类中定义init方法，然后放入方法组件的 React.useEffect方法中调用。
-
-### 4. 模块生命周期方法
-> 目前只提供了onCreated 钩子方法， onCreated 前面已经介绍过了， 在调用 reset方法前自动调用， 可以用来进行一些数据清理工作， 比如取消事件注册，定时器任务等等。
-
-### 4. setData 妙用
-#### 1. 便捷地操作model中的数据
-> 有时候页面中需要修改model中的数据， 如果只是修改少量数据，新定义一个方法会大大增加业务代码量， 可以使用 model.setData(params)方法
-> params是一个普通对象， key是要修改的属性名， value是修改后的值。
-```jsx
-export default () => {
-    const model = useModel(HomeModel);
-    const {
-        num,username
-    } = model;
-    useEffect(() => {
-        model.init();
-    }, []);
     return (
-        <div className={style.container}>
-            <div className={style.content}>
-                <div className={style.addOne} onClick={() => model.setData({num: num + 1})}>
-                    +1
-                </div>
-                <div className={style.txt}>
-                    {num}
-                </div>
-                <div className={style.txt}>
-                    {username}
-                </div>
-            </div>
+        <div>
+            <div onClick={model.add}>+1</div>
+            <div>{num}</div>
         </div>
     );
 };
 ```
-- 用 model.setData({num: num + 1}) 取代 model.add 方法， 可以减少代码量， 但是缺点是每次页面渲染都会生成一个新方法， 可能对性能优化不是很友好， 具体取舍看业务场景吧！
-  setData 所设置的属性名尽量是模块类中存在的属性， 比如上例 setData({num2: 33}) 设置一个新属性num2, 虽然运行没问题， 但是不提倡这样写。
 
-#### 2. 给model动态添加新属性
-```js
-@service(module.id)
-class SetDataModel extends Model {
-    num = 0;
-    addNum2() {
-       this.num2 = 100; // 此方法不会在页面中获取num2
-       this.setData({num3: 200}); // 可以在页面中获取num3
+## 4. 核心概念
+
+### 4.1 模块定义
+
+模块是MTOR的核心概念，通过`@service`装饰器定义：
+
+```javascript
+@service('moduleName') // 或使用 @service(module.id) 或 @define(module)
+class MyModel extends Model {
+    // 属性定义
+    count = 0;
+    
+    // 方法定义
+    increment() {
+        this.count++;
+    }
+    
+    async fetchData() {
+        // 异步操作
     }
 }
-export default SetDataModel;
+```
+
+### 4.2 依赖注入
+
+MTOR支持模块间的依赖注入，使用`@inject`装饰器：
+
+```javascript
+import UserModel from './UserModel';
+
+@service(module.id)
+class HomeModel extends Model {
+    // 注入UserModel实例
+    @inject(UserModel)
+    user;
+    
+    async init() {
+        // 可以直接使用注入的实例
+        console.log(this.user.name);
+    }
+}
+```
+
+也可以使用`@resource`按名称注入：
+
+```javascript
+@service(module.id)
+class HomeModel extends Model {
+    // 按名称注入
+    @resource('usermodel')
+    user;
+}
+```
+
+### 4.3 数据操作
+
+#### 4.3.1 直接修改属性
+
+在模块方法中可以直接修改属性：
+
+```javascript
+@service(module.id)
+class CounterModel extends Model {
+    count = 0;
+    
+    increment() {
+        this.count++; // 直接修改属性
+    }
+}
+```
+
+#### 4.3.2 使用setData方法
+
+可以使用`setData`方法同时修改多个属性：
+
+```javascript
+@service(module.id)
+class UserModel extends Model {
+    name = '';
+    age = 0;
+    
+    updateUser(name, age) {
+        this.setData({
+            name,
+            age
+        });
+    }
+}
+```
+
+在组件中也可以直接调用`setData`：
+
+```jsx
+const model = useModel(UserModel);
+
+// 在事件处理函数中
+const handleClick = () => {
+    model.setData({ name: 'John', age: 30 });
+};
+```
+
+### 4.4 生命周期方法
+
+MTOR提供了几个生命周期方法：
+
+- `onCreated`：模块首次创建时调用
+- `onBeforeClean`：在调用`reset`方法前自动调用
+
+```javascript
+@service(module.id)
+class MyModel extends Model {
+    timer = null;
+    
+    onCreated() {
+        // 模块创建时执行初始化
+        this.timer = setInterval(() => {
+            // 定时任务
+        }, 1000);
+    }
+    
+    onBeforeClean() {
+        // 清理资源
+        clearInterval(this.timer);
+    }
+}
+```
+
+## 5. 高级特性
+
+### 5.1 异步操作处理
+
+MTOR对异步操作做了特别优化，可以在异步方法中直接修改属性：
+
+```javascript
+@service(module.id)
+class DataModel extends Model {
+    data = null;
+    loading = false;
+    error = null;
+    
+    async fetchData() {
+        try {
+            this.loading = true; // 修改会立即反映到UI
+            this.data = await api.getData();
+        } catch (err) {
+            this.error = err.message;
+        } finally {
+            this.loading = false;
+        }
+    }
+}
+```
+
+### 5.2 模块重置
+
+使用`reset`方法可以将模块状态重置为初始值：
+
+```jsx
+useEffect(() => {
+    model.init();
+    return model.reset; // 组件卸载时重置模块
+}, []);
+```
+
+### 5.3 事件总线
+
+MTOR提供了事件总线机制，可以用于模块间通信：
+
+```javascript
+import { evtBus } from 'mtor';
+
+// 在一个模块中发布事件
+evtBus.emit('userLoggedIn', { userId: 123 });
+
+// 在另一个模块中订阅事件
+onCreated() {
+    evtBus.on('userLoggedIn', (data) => {
+        this.userId = data.userId;
+    });
+}
+
+// 清理事件监听
+onBeforeClean() {
+    evtBus.off('userLoggedIn', fn); // fn 为订阅时候提供的方法
+}
+```
+
+## 6. API参考
+
+### 6.1 装饰器
+
+- `@service(name: string)`：定义一个模块
+- `@inject(ModelClass)`：按类型注入依赖
+- `@resource(name: string)`：按名称注入依赖
+
+### 6.2 Model类
+
+基础模型类，提供以下方法：
+
+- `setData(data: Object)`：批量设置属性
+- `reset()`：重置模块状态
+- `onBeforeReset(callback: Function)`：注册重置前回调
+
+### 6.3 Hooks
+
+- `useModel(ModelClass)`：获取模块实例
+- `useInitModel(ModelClass, initFn?, clean?)`：获取模块实例并处理初始化和清理
+
+### 6.4 其他API
+
+- `define(module)`：基于webpack模块定义模块
+- `getModels()`：获取所有模型实例
+- `evtBus`：事件总线实例
+
+## 7. 最佳实践
+
+### 7.1 目录组织
+
+推荐的目录结构：
 
 ```
--说明
-1. 正常情况下， 属性应该先声明再使用，尽量减少添加没有在类中声明的属性
-2. 也可以在页面中调用setData 动态添加属性
+src/
+├── models/
+│   ├── HomeModel.js
+│   └── UserModel.js
+├── pages/
+│   ├── Home/
+│   │   ├── index.js
+│   │   └── style.less
+│   └── User/
+│       ├── components/
+│       │   └── UserCard/
+│       │       ├── index.js
+│       │       └── style.less
+│       ├── index.js
+│       └── style.less
+└── index.js
+```
 
-### 5. 重置model中的所有数据到初始值
-> 组件销毁的时候， 我们要清空现有的数据， 我们可以调用 model.reset；
+### 7.2 模块定义规范
+
+1. 使用`@service(module.id)`确保模块名称全局唯一
+2. 类名与文件名保持一致
+3. 继承`Model`基类
+4. 使用TypeScript或JSDoc提供类型信息
+5. 添加热更新支持：`module.hot?.accept()`
+6. 不要随意添加未声明的属性
+7. 异步方法封装为Promise
+8. 一个页面组件对应一个模型
+
+### 7.3 组件使用规范
+
+1. 使用`useInitModel`代替`useModel`+`useEffect`组合
+2. 页面组件中的业务逻辑放入模型中
+3. 列表项组件通过属性传值，不直接使用模型
+
+### 7.4 对象属性修改
+
+修改对象类型属性时，需要更新引用：
+
+```javascript
+// 错误方式
+updateObj() {
+    this.obj.a = 2; // 不会触发更新
+}
+
+// 正确方式
+updateObj() {
+    this.obj = { ...this.obj, a: 2 };
+}
+```
+
+### 7.5 热更新优化
+
+在模型文件末尾添加：
+
+```javascript
+// webpack
+module.hot?.accept();
+
+// vite
+import.meta.hot?.accept();
+```
+
+## 8. 常见问题
+
+### 8.1 中文输入法兼容性问题
+
+对于可控组件，推荐使用`setData`方法：
+
 ```jsx
-export default () => {
-    const model = useModel(HomeModel);
-    const {
-        num,username
-    } = model;
-    useEffect(() => {
-        model.init();
-        return model.reset; // 当前组件销毁的时候会调用 model.reset() 方法
-    }, []);
+<Input 
+    value={name} 
+    onChange={({target: {value}}) => model.setData({name: value})}
+/>
+```
+
+### 8.2 属性未更新到UI
+
+可能的原因：
+
+1. 修改了对象属性但没有更新引用
+2. 使用了未在类中声明的属性
+3. 在构造函数中调用了异步方法
+
+### 8.3 模块间循环依赖
+
+避免模块间形成循环依赖，可以使用事件总线或共享服务模式解决。
+
+## 9. 版本迁移
+
+### 9.1 从1.x迁移到2.x
+
+主要变化：
+
+1. 使用`async/await`替代`generator`方法
+2. 对TypeScript支持更友好
+3. 底层优化，性能更高效
+4. 普通异步回调可以直接通过`this`修改数据
+
+迁移步骤：
+
+1. 将所有`generator`方法改为`async/await`
+2. 检查并更新依赖注入方式
+3. 更新异步操作处理方式
+
+## 附录：完整示例
+
+### 模型定义
+
+```typescript
+// UserModel.ts
+import { service, Model } from 'mtor';
+
+@service('usermodel')
+class UserModel extends Model {
+    name = 'Guest';
+    isLoggedIn = false;
+    
+    login(username: string) {
+        this.name = username;
+        this.isLoggedIn = true;
+    }
+    
+    logout() {
+        this.name = 'Guest';
+        this.isLoggedIn = false;
+    }
+}
+
+export default UserModel;
+
+// HomeModel.ts
+import { service, Model, inject } from 'mtor';
+import UserModel from './UserModel';
+
+@service(module.id)
+class HomeModel extends Model {
+    count = 0;
+    messages = [];
+    
+    @inject(UserModel)
+    user;
+    
+    async init() {
+        this.messages = await this.fetchMessages();
+    }
+    
+    increment() {
+        this.count++;
+    }
+    
+    async fetchMessages() {
+        // 模拟API调用
+        return new Promise(resolve => {
+            setTimeout(() => {
+                resolve(['Message 1', 'Message 2', 'Message 3']);
+            }, 1000);
+        });
+    }
+}
+
+export default HomeModel;
+```
+
+### 组件使用
+
+```tsx
+// HomePage.tsx
+import React from 'react';
+import { useInitModel } from 'mtor';
+import HomeModel from '../models/HomeModel';
+
+const HomePage: React.FC = () => {
+    const model = useInitModel(HomeModel, m => m.init(), true);
+    const { count, messages, user } = model;
+    
     return (
-        <div className={style.container}>
-            <div className={style.content}>
-                <div className={style.addOne} onClick={() => model.setData({num: num + 1})}>
-                    +1
-                </div>
-                <div className={style.txt}>
-                    {num}
-                </div>
-                <div className={style.txt}>
-                    {username}
-                </div>
+        <div>
+            <h1>Welcome, {user.name}</h1>
+            
+            <div>
+                <h2>Counter: {count}</h2>
+                <button onClick={() => model.increment()}>Increment</button>
             </div>
+            
+            <div>
+                <h2>Messages</h2>
+                <ul>
+                    {messages.map((msg, index) => (
+                        <li key={index}>{msg}</li>
+                    ))}
+                </ul>
+            </div>
+            
+            {user.isLoggedIn ? (
+                <button onClick={() => user.logout()}>Logout</button>
+            ) : (
+                <button onClick={() => user.login('John')}>Login</button>
+            )}
         </div>
     );
 };
-```
--说明
-1. 可以用 useInitModel 简化以上逻辑。useInitModel 方法还可以避免开发过程中热更新对init方法重复调用， 大大提高开发体验
 
-# 四、从1.0 迁移到2.0
-> 只需要把 generator方法改为 async / await 即可。
->
-> 
-
-# 五、已知存在的问题
-#### 1. 由于页面数据更新是基于异步的， 如果实现可控组件，对中文输入法在部分浏览器存在兼容性问题， 可以使用setData,解决方案如下:
-~~~jsx
-export default () => {
-    const model = useModel(DemoModel);
-    const {name, name1} = model;
-   return <div>
-      <Input value={name} onChange={({target: {value}}) => model.setData({name: value})}/>
-      <Input value={name1} onChange={({target: {value}}) => model.setName1(value)}/> {/* 在DemoModel 定义了setName1 这个方法情况下， 这种写法部分浏览器下会存在兼容性问题*/}
-   </div>
-}
-~~~
-# 六、最佳实践
-mtor 使用最佳实践参考 [最佳实践](https://github.com/sampsonli/mtor/blob/main/doc/最佳实践.md)
-### 1. 应用场景
-> mtor 非常适用于具有复杂交互逻辑的页面/组件， 或者页面之间有数据依赖/共享等场景；
-> 不适用于循环列表项中的复杂组件。
-### 2. ui展示层与数据分离
-> 页面展示和数据可以进一步拆分， 页面中不包含任何逻辑处理， 数据层完全基于mtor中Model；
-> 以面向对象的方式进行开发， 对外提供api接口和数据文档，并且一份Model可以同时适配多平台，比如同时适配移动端h5 和pc端页面，
-> 多人协作的时候， 可以把 ui设计 和 数据逻辑处理 完全交给不同人负责，高效完成需求， 同时可以保证代码风格统一。
-
-### 3. 开发环境开启热更新
-> 正常情况下 webpack环境下的热更新， 会依据所修改的文件，依次往上找依赖组件模块，直到找到调用过" module.hot.accept() "方法的模块，最后执行整体更新。 如果我们在开发的过程中，
-> 只修改Model文件， 没必要同时更新依赖Model的页面文件， 我们可以在Model所在文件底部加入" module.hot && module.hot.accept(); "即可，只会更新当前文件，这样可以达到最优开发体验。
-> mtor 底层有对热更新做适配，会保留里面的所有数据， 包括静态属性和类属性， 热更新数据都不会丢失。
-
-
-# 七、自己构建
-如果需要定制api GitHub 上克隆代码并自己构建。
-```shell
-git clone https://github.com/sampsonli/mtor node_modules/mtor
-cd node_modules/mtor
-npm install
-npm run build
+export default HomePage;
 ```
 
-# 八、一起维护
-欢迎大家pull request 贡献自己的代码、提取宝贵意见。
-# 九、参考模板项目
-一个整合最新react+webpack5通用模板项目[react_template_project](https://github.com/sampsonli/react_template_project)
-此项目本人会不断维护更新，以最佳实践去使用 mtor。 大家也可以贡献自己的代码到这个项目中。
+---
 
+更多信息和示例，请访问[GitHub仓库](https://github.com/sampsonli/mtor)。
