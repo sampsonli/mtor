@@ -230,31 +230,6 @@ const handleClick = () => {
 };
 ```
 
-### 4.4 生命周期方法
-
-MTOR提供了几个生命周期方法：
-
-- `onCreated`：模块首次创建时调用
-- `onBeforeClean`：在调用`reset`方法前自动调用
-
-```javascript
-@service(module.id)
-class MyModel extends Model {
-    timer = null;
-    
-    onCreated() {
-        // 模块创建时执行初始化
-        this.timer = setInterval(() => {
-            // 定时任务
-        }, 1000);
-    }
-    
-    onBeforeClean() {
-        // 清理资源
-        clearInterval(this.timer);
-    }
-}
-```
 
 ## 5. 高级特性
 
@@ -293,28 +268,7 @@ useEffect(() => {
 }, []);
 ```
 
-### 5.3 事件总线
 
-MTOR提供了事件总线机制，可以用于模块间通信：
-
-```javascript
-import { evtBus } from 'mtor';
-
-// 在一个模块中发布事件
-evtBus.emit('userLoggedIn', { userId: 123 });
-
-// 在另一个模块中订阅事件
-onCreated() {
-    evtBus.on('userLoggedIn', (data) => {
-        this.userId = data.userId;
-    });
-}
-
-// 清理事件监听
-onBeforeClean() {
-    evtBus.off('userLoggedIn', fn); // fn 为订阅时候提供的方法
-}
-```
 
 ## 6. API参考
 

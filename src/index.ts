@@ -8,18 +8,30 @@
  import {eventBus} from './EventBus';
 
 
- export {eventBus as evtBus} from './EventBus';
- // 保存所有模块的原型
- const allProto = {};
- // 保存所有模块的static属性, 方便开发模式热更新静态数据保留
- const allStatic = {};
+// 导出事件总线实例，供外部使用
+export {eventBus as evtBus} from './EventBus';
 
- let allState = {};
+/**
+ * 全局存储对象，用于管理所有模块实例
+ */
 
- const FLAG_PREFIX = 'mtor/';
+// 保存所有模块的原型对象，键为模块名称，值为模块原型
+const allProto: Record<string, any> = {};
 
- // 用于保存所有模块依赖注入注册的事件， 防止热更新的时候内存泄露
- const allEvents = {};
+// 保存所有模块的静态属性，用于开发模式下的热更新，确保静态数据不丢失
+const allStatic: Record<string, any> = {};
+
+// 保存所有模块的实例状态，键为模块名称，值为模块实例
+let allState: Record<string, any> = {};
+
+// 事件前缀，用于区分不同模块的事件
+const FLAG_PREFIX = 'mtor/';
+
+/**
+ * 保存所有模块依赖注入注册的事件监听器，防止热更新时内存泄漏
+ * 结构：{ [模块名称]: { [事件名称]: 事件监听函数 } }
+ */
+const allEvents: Record<string, Record<string, Function>> = {};
 
  /**
   * 基于webpack打包构建中定义模块
@@ -136,9 +148,6 @@
           * 重置模块数据到初始状态， 一般用于组件销毁的时候调用
           */
          prototype.reset = function () {
-             if (typeof prototype.onBeforeClean === 'function') { // 清空数据前钩子函数
-                 prototype.onBeforeClean();
-             }
              eventBus.emit(`${FLAG_PREFIX}${ns}-reset`);
              const newObj = Object.create(allProto[ns]);
              const origin = allProto[ns].__origin;
@@ -196,18 +205,21 @@
              initSyncState(allState[ns]);
              assign(toBeSyncState, initState);
              syncFn(); // 强制触发一次更新
-             assign(Clazz, allStatic[ns]);
+             // assign(Clazz, allStatic[ns]);
+             Promise.resolve().then(function () {
+                 Object.keys(allStatic[ns]).forEach(function (key) {
+                     Clazz[key] = allStatic[ns][key];
+                 });
+                 allStatic[ns] = Clazz;
+             });
          } else {
              allState[ns] = initState;
              initSyncState(initState);
-             allStatic[ns] = assign({}, Clazz);
+             allStatic[ns] = Clazz;
          }
 
          allProto[ns] = prototype;
-         // 初始化提供created 方法调用, 热更新不重复调用
-         if (typeof prototype.onCreated === 'function' && !isHotReload) {
-             prototype.onCreated();
-         }
+
          Clazz.ns = ns;
          // assign(Clazz.prototype, prototype); // 覆盖初始原型对象
          return Clazz;

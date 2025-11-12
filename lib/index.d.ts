@@ -60,7 +60,7 @@ export declare class Model {
 /**
  * 获取所有模型实例
  */
-export declare const getModels: () => {};
+export declare const getModels: () => Record<string, any>;
 /**
  * 对useModel 方法二次封装的工具方法， 可以避免开发环境热更新重新调用初始化方法以及重置方法。
  * 页面中实例化模块类，同时调用指定初始化方法，以及页面销毁的时候调用 reset方法<br/>
