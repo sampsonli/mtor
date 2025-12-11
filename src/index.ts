@@ -44,6 +44,14 @@ const allEvents: Record<string, Record<string, Function>> = {};
  }
 
 
+ function getPropNames(proto: any, propNames: string[] = []) : string[] {
+     if(!proto || proto === Model.prototype || proto === Object.prototype) {
+         return propNames;
+     }
+     propNames = [...Object.getOwnPropertyNames(proto), ...propNames];
+     return getPropNames(Object.getPrototypeOf(proto), propNames);
+ }
+
  /**
   * 创建模块
   * @param {string} ns -- 模块名称， 模块名称唯一， 不能有冲突
@@ -88,10 +96,7 @@ const allEvents: Record<string, Record<string, Function>> = {};
              });
              isSyncing = true;
          }
-         let propNames = Object.getOwnPropertyNames(Clazz.prototype);
-         if(Object.getPrototypeOf(Clazz.prototype) !== Model.prototype) {
-             propNames = [...Object.getOwnPropertyNames(Object.getPrototypeOf(Clazz.prototype)), ...propNames];
-         }
+         let propNames = getPropNames(Clazz.prototype);
          propNames.forEach(key => {
              if (key !== 'constructor' && typeof Clazz.prototype[key] === 'function') {
                  const evtName = `${FLAG_PREFIX}${ns}-function-${key}`;
